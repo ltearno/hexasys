@@ -1,0 +1,53 @@
+body
+{
+	background: lightgrey;
+}
+
+.content {
+	text-align: left; 
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.messages {
+	position: fixed;
+	top: 20px;
+	left: 20px;
+	width: 300px;
+	padding: 10px;
+}
+
+.message {
+	padding: 0px;
+	border: 5px solid red;
+	background: white;
+	color: black;
+	padding: 10px;
+	margin: 10px;
+}
+
+table
+{
+	border: 1px solid black;
+	border-collapse: collapse;
+	margin: 5px;
+}
+
+th
+{
+	border-width: 1px;
+	padding: 5px;
+	background-color: #ddd;
+}
+
+td
+{
+	border-width: 1px;
+	padding: 5px;
+	/*background-color: #111111;*/
+}
+
+tr:hover td
+{
+	background-color: #eee;
+}
