@@ -1,5 +1,15 @@
 <?php
 
+function QPathQueryFieldList( $table, $fields )
+{
+	$res = array();
+
+	foreach( $fields as $field )
+		$res[] = "F[$table.$field as `$table.$field`]";
+
+	return implode( " ", $res ) . " ";
+}
+
 class QPathParamQuery
 {
 	var $QPath;
