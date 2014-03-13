@@ -1,24 +1,26 @@
 <?php
-
 date_default_timezone_set( "UTC" );
 
 /*
-	TODO : CalendarPeriod->GetFlat : TAKE DAYS IN ACCOUNT
-*/
-
+ * TODO : CalendarPeriod->GetFlat : TAKE DAYS IN ACCOUNT
+ */
 function date2Display( $date )
 {
-	$locale = HLib("LocaleInfo")->GetLocale();
+	return date2DisplayEx( $date, HLib( "LocaleInfo" )->GetLocale() );
+}
+
+function date2DisplayEx( $date, $locale )
+{
 	if( $locale == "fr" )
 	{
 		date_parse_ex( substr( $date, 0, 10 ), $year, $month, $day );
 		
-		if( $month>0 && $month<=12 )
+		if( $month > 0 && $month <= 12 )
 			$monthName = i18n( "MonthNames", "fr", $month );
 		else
-			$monthName =  "-";
+			$monthName = "-";
 		
-		$str = ((integer)$day). " " . $monthName . " $year";
+		$str = ((integer) $day) . " " . $monthName . " $year";
 		
 		return $str;
 	}
@@ -26,13 +28,12 @@ function date2Display( $date )
 	return date( "F j, Y", strtotime( substr( $date, 0, 10 ) ) );
 }
 
-define( "TIME_BEGIN",	'1970-01-01' );
-define( "TIME_END",		'2038-01-10' ); // the 19th jan 2038 is the last day that strtotime can handle...
-
+define( "TIME_BEGIN", '1970-01-01' );
+define( "TIME_END", '2038-01-10' ); // the 19th jan 2038 is the last day that strtotime can handle...
 function date_add_day( $date, $nbDays )
 {
 	// hr min sec month day year
-	//return mktime( 1, 0, 0, 1, 2, 1970 );
+	// return mktime( 1, 0, 0, 1, 2, 1970 );
 	
 	// 86400 is number of seconds in a day
 	$time = strtotime( $date ) + 86400 * $nbDays;
@@ -45,8 +46,8 @@ function date_add_day( $date, $nbDays )
 function datetime_add_day( $date, $nbDays )
 {
 	// hr min sec month day year
-	//return mktime( 1, 0, 0, 1, 2, 1970 );
-
+	// return mktime( 1, 0, 0, 1, 2, 1970 );
+	
 	// 86400 is number of seconds in a day
 	$time = strtotime( $date ) + 86400 * $nbDays;
 	if( $time < 0 )
@@ -57,15 +58,15 @@ function datetime_add_day( $date, $nbDays )
 
 function date_interval_days( $from, $to )
 {
-	return 1 + ( ( strtotime($to) - strtotime($from) ) / 86400 );
+	return 1 + ((strtotime( $to ) - strtotime( $from )) / 86400);
 }
 
 // returns year, month and date in human format (beginning at 1, not 0)
 function date_parse_ex( $date, &$year, &$month, &$day )
 {
-    $year = substr( $date, 0, 4 );
-    $month = substr( $date, 5, 2 );
-    $day = substr( $date, 8, 2 );
+	$year = substr( $date, 0, 4 );
+	$month = substr( $date, 5, 2 );
+	$day = substr( $date, 8, 2 );
 }
 
 function intdiv( $q, $d )
@@ -84,14 +85,14 @@ function date_get_day( $date )
 	$m = $month; // + 1;
 	$d = $day;
 	
-	$z = ($m < 3) ? $y-1 : $y;
+	$z = ($m < 3) ? $y - 1 : $y;
 	$r = ($m < 3) ? 0 : 2;
 	
-	//return ( (23*$m)/9 + $d + 4 + $y + $z/4 - $z/100 + $z/400 - $r ) % 7;
+	// return ( (23*$m)/9 + $d + 4 + $y + $z/4 - $z/100 + $z/400 - $r ) % 7;
 	
-	return ( intdiv(23*$m,9) + $d + 4 + $y + intdiv($z,4) - intdiv($z,100) + intdiv($z,400) - $r ) % 7;
-		
-	return ( 23*(int)(floor($m/9)) + $d + 4 + $y + (int)(floor($z/4)) - (int)(floor($z/100)) + (int)(floor($z/400)) - $r ) % 7;
+	return (intdiv( 23 * $m, 9 ) + $d + 4 + $y + intdiv( $z, 4 ) - intdiv( $z, 100 ) + intdiv( $z, 400 ) - $r) % 7;
+	
+	return (23 * (int) (floor( $m / 9 )) + $d + 4 + $y + (int) (floor( $z / 4 )) - (int) (floor( $z / 100 )) + (int) (floor( $z / 400 )) - $r) % 7;
 }
 
 function now()
@@ -112,36 +113,38 @@ function SliceByYear( $periodExpr )
 	$from = null;
 	$to = null;
 	$cal->GetBoundaries( $tree, $from, $to );
-
+	
 	date_parse_ex( $from, $startYear, $m, $d );
-    date_parse_ex( $to, $endYear, $m, $d );
-        
-    $periods = array();
-    for( $year=$startYear; $year<=$endYear; $year++ )
-		$periods[] = array( $year, "[$year-01-01;$year-12-31] $periodExpr &" );
-        
-    return $periods;
+	date_parse_ex( $to, $endYear, $m, $d );
+	
+	$periods = array();
+	for( $year = $startYear; $year <= $endYear; $year++ )
+		$periods[] = array(
+				$year,
+				"[$year-01-01;$year-12-31] $periodExpr &" );
+	
+	return $periods;
 }
 
 function &getSub( &$array, $key )
 {
-	$v =& $array[$key];
+	$v = & $array[$key];
 	return $v;
 }
 
 class RefHolder
 {
 	var $ref;
-	
+
 	function __construct( &$ref )
 	{
-		$this->ref =& $ref;
+		$this->ref = & $ref;
 	}
 }
 
 function &pop( &$arr )
 {
-	$v =& $arr[count($arr)-1];
+	$v = & $arr[count( $arr ) - 1];
 	array_pop( $arr );
 	return $v;
 }
@@ -152,17 +155,18 @@ function push( &$arr, &$elem )
 }
 
 class Calendar
-{	
+{
+
 	function Parse( $expression )
 	{
 		$tree = $this->_Parse( $expression );
 		return $tree;
 	}
-	
+
 	function ParseParam( $expression, $dateParam )
 	{
 		// calculates the day of week from the given date
-		$dayParam = Date( 'w', strtotime($dateParam) );
+		$dayParam = Date( 'w', strtotime( $dateParam ) );
 		
 		$value = $this->_ParseParam( $expression, $dateParam, $dayParam );
 		
@@ -179,7 +183,7 @@ class Calendar
 	function TransformToNightsSpeaking( $expression )
 	{
 		$tree = $this->Parse( $expression );
-		$trim = $this->GetFlat($tree);
+		$trim = $this->GetFlat( $tree );
 		$trim->TrimPeriods();
 		$nightSpealingExpression = $trim->GetExpression();
 		return $nightSpealingExpression;
@@ -189,7 +193,7 @@ class Calendar
 	function TransformToDaysSpeaking( $expression )
 	{
 		$tree = $this->Parse( $expression );
-		$trim = $this->GetFlat($tree);
+		$trim = $this->GetFlat( $tree );
 		
 		// be careful : if this period is equivalent to "never", we can't get things done, we miss information...
 		if( $trim->GetNbDays() == 0 )
@@ -205,15 +209,15 @@ class Calendar
 	{
 		return $this->GetFlat( $tree )->GetNbDays();
 	}
-	
+
 	function GetNbNights( $tree )
 	{
 		return $this->GetFlat( $tree )->GetNbNights();
 	}
-	
+
 	function GetBoundaries( $tree, &$from, &$to )
 	{
-        return $this->_GetBoundaries( $tree, $from, $to );
+		return $this->_GetBoundaries( $tree, $from, $to );
 	}
 	
 	// takes as a parameter an array of period expressions and their initial values
@@ -224,8 +228,8 @@ class Calendar
 		$nbPeriod = count( $periodsAndValues );
 		if( $nbPeriod == 0 )
 			return new CalendarPeriodAssociative();
-		
-		// get the first non empty period
+			
+			// get the first non empty period
 		$res = null;
 		$first = 0;
 		do
@@ -234,7 +238,7 @@ class Calendar
 			$tree = $this->Parse( $firstPeriodAndValue[0] );
 			if( $this->GetNbDays( $tree ) == 0 )
 			{
-				//echo "IGNORING F PERIOD $first (" . $firstPeriodAndValue[0] . ") BECAUSE EMPTY<br/>";
+				// echo "IGNORING F PERIOD $first (" . $firstPeriodAndValue[0] . ") BECAUSE EMPTY<br/>";
 				$first++;
 				if( $first >= $nbPeriod )
 					return new CalendarPeriodAssociative();
@@ -246,17 +250,18 @@ class Calendar
 			$res->Init( $flat, $firstPeriodAndValue[1] );
 			
 			break;
-		} while( true );
+		}
+		while( true );
 		
 		if( $res == null )
 			return null; // no non-empty period
 		
-		for( $i=$first+1; $i<$nbPeriod; $i++ )
+		for( $i = $first + 1; $i < $nbPeriod; $i++ )
 		{
 			$tree = $this->Parse( $periodsAndValues[$i][0] );
 			if( $this->GetNbDays( $tree ) == 0 )
 			{
-				//echo "IGNORING N PERIOD $i (" . $periodsAndValues[$i][0] . ") BECAUSE EMPTY<br/>";
+				// echo "IGNORING N PERIOD $i (" . $periodsAndValues[$i][0] . ") BECAUSE EMPTY<br/>";
 				continue;
 			}
 			
@@ -270,7 +275,7 @@ class Calendar
 		
 		return $res;
 	}
-	
+
 	private function _hasDaySpec( $tree )
 	{
 		switch( $tree['t_type'] )
@@ -291,61 +296,66 @@ class Calendar
 				return $this->_hasDaySpec( $tree['t_op_left'] ) || $this->_hasDaySpec( $tree['t_op_right'] );
 		}
 	}
-	
+
 	function GetBeautiful( $tree )
+	{
+		return $this->GetBeautifulEx( $tree, HLib( "LocaleInfo" )->GetLocale() );
+	}
+
+	function GetBeautifulEx( $tree, $locale )
 	{
 		// should one day find something better !
 		if( $this->_hasDaySpec( $tree ) )
 		{
-			return $this->_GetBeautiful( $tree );
+			return $this->_GetBeautiful( $tree, $locale );
 		}
 		else
 		{
 			$p = $this->GetFlat( $tree );
-			$beauty = $p->GetBeautiful();
+			$beauty = $p->GetBeautifulEx( $locale );
 			if( $beauty == null )
 				return "ERROR";
 			return $beauty;
 		}
 	}
-	
-	function _GetBeautiful( $tree )
+
+	function _GetBeautiful( $tree, $locale )
 	{
 		switch( $tree['t_type'] )
 		{
 			case 'a':
-				return i18nStd( 'Always' );
+				return i18n( 'Always', $locale );
 			case 'n':
-				return i18nStd( 'Never' );
+				return i18n( 'Never', $locale );
 			case 'd':
-				return i18nStd( "WeekDays", $tree['t_val'] );
+				return i18n( "WeekDays", $locale, $tree['t_val'] );
 			case 'p':
-				return i18nStd( "DateRange", date2Display($tree['t_from']), date2Display($tree['t_to']) );
+				return i18n( "DateRange", $locale, date2DisplayEx( $tree['t_from'], $locale ), date2DisplayEx( $tree['t_to'], $locale ) );
 			case '~':
 				if( $tree['t_op']['t_type'] == 'a' )
-					return i18nStd( 'Never' );
-				return i18nStd( 'Not' ) . ' ' . $this->_GetBeautiful( $tree['t_op'] );
+					return i18n( 'Never', $locale );
+				return i18n( 'Not', $locale ) . ' ' . $this->_GetBeautiful( $tree['t_op'], $locale );
 			case '&':
-				return '( ' . $this->GetBeautiful( $tree['t_op_left'] ) . ' '.i18nStd( 'and' ).' ' . $this->GetBeautiful( $tree['t_op_right'] ) . ' )';
+				return '( ' . $this->GetBeautifulEx( $tree['t_op_left'], $locale ) . ' ' . i18n( 'and', $locale ) . ' ' . $this->GetBeautifulEx( $tree['t_op_right'], $locale ) . ' )';
 			case '|':
-				return '( ' . $this->GetBeautiful( $tree['t_op_left'] ) . ' '.i18nStd( 'or' ).' ' . $this->GetBeautiful( $tree['t_op_right'] ) . ' )';
+				return '( ' . $this->GetBeautifulEx( $tree['t_op_left'], $locale ) . ' ' . i18n( 'or', $locale ) . ' ' . $this->GetBeautifulEx( $tree['t_op_right'], $locale ) . ' )';
 		}
 	}
-	
+
 	function GetFlat( $tree )
 	{
 		$flat = $this->GetFlatInternal( $tree );
 		return $flat;
 	}
-	
+
 	function GetFlatInternal( $tree )
 	{
 		// on commence par la racine
 		$stack = array();
-		array_push( $stack, new RefHolder($tree) );
+		array_push( $stack, new RefHolder( $tree ) );
 		
 		$count = 50000;
-		while( (count( $stack ) > 0) && ($count-- >0 ) )
+		while( (count( $stack ) > 0) && ($count-- > 0) )
 		{
 			$nodeRef = array_pop( $stack );
 			
@@ -413,10 +423,10 @@ class Calendar
 					{
 						// sinon, visiter les fils non visités d'abord et garder le parent pour plus tard
 						array_push( $stack, $nodeRef );
-						if( ! $leftProcessed )
-							array_push( $stack, new RefHolder($nodeRef->ref['t_op_left']) );
-						if( ! $rightProcessed )
-							array_push( $stack, new RefHolder($nodeRef->ref['t_op_right']) );
+						if( !$leftProcessed )
+							array_push( $stack, new RefHolder( $nodeRef->ref['t_op_left'] ) );
+						if( !$rightProcessed )
+							array_push( $stack, new RefHolder( $nodeRef->ref['t_op_right'] ) );
 					}
 					break;
 			}
@@ -424,7 +434,7 @@ class Calendar
 		
 		return $nodeRef->ref['flat'];
 	}
-	
+
 	private function _GetBoundaries( $tree, &$from, &$to )
 	{
 		$flat = $this->GetFlatInternal( $tree );
@@ -435,7 +445,7 @@ class Calendar
 		}
 		return $flat->GetBoundaries( $from, $to );
 	}
-	
+
 	private function _Parse( $expression )
 	{
 		$pos = 0;
@@ -444,7 +454,7 @@ class Calendar
 		
 		while( $token = $this->_NextToken( $expression, $pos ) )
 		{
-			//echo "token : " . $token['t_type'] . "<br/>";
+			// echo "token : " . $token['t_type'] . "<br/>";
 			switch( $token['t_type'] )
 			{
 				case 'a':
@@ -461,17 +471,25 @@ class Calendar
 					break;
 				case '~':
 					$operand = array_pop( $stack );
-					array_push( $stack, array( 't_type'=>'~', 't_op'=>$operand ) );
+					array_push( $stack, array(
+							't_type' => '~',
+							't_op' => $operand ) );
 					break;
 				case '&':
 					$operandR = array_pop( $stack );
 					$operandL = array_pop( $stack );
-					array_push( $stack, array( 't_type'=>'&', 't_op_left'=>$operandL, 't_op_right'=>$operandR ) );
+					array_push( $stack, array(
+							't_type' => '&',
+							't_op_left' => $operandL,
+							't_op_right' => $operandR ) );
 					break;
 				case '|':
 					$operandR = array_pop( $stack );
 					$operandL = array_pop( $stack );
-					array_push( $stack, array( 't_type'=>'|', 't_op_left'=>$operandL, 't_op_right'=>$operandR ) );
+					array_push( $stack, array(
+							't_type' => '|',
+							't_op_left' => $operandL,
+							't_op_right' => $operandR ) );
 					break;
 			}
 		}
@@ -481,7 +499,7 @@ class Calendar
 		
 		return $stack[0];
 	}
-	
+
 	private function _ParseParam( $expression, $dateParam, $dayParam )
 	{
 		$pos = 0;
@@ -490,7 +508,7 @@ class Calendar
 		
 		while( $token = $this->_NextToken( $expression, $pos ) )
 		{
-			//echo "token : " . $token['t_type'] . "<br/>";
+			// echo "token : " . $token['t_type'] . "<br/>";
 			switch( $token['t_type'] )
 			{
 				case 'a':
@@ -512,7 +530,7 @@ class Calendar
 						array_push( $stack, false );
 					break;
 				case '~':
-					array_push( $stack, ! array_pop( $stack ) );
+					array_push( $stack, !array_pop( $stack ) );
 					break;
 				case '&':
 					$operandR = array_pop( $stack );
@@ -537,7 +555,7 @@ class Calendar
 	// return null if error
 	function GetDate( &$text, &$pos )
 	{
-		if( $text[4+$pos]!='-' || $text[7+$pos]!='-' )
+		if( $text[4 + $pos] != '-' || $text[7 + $pos] != '-' )
 			return null;
 		
 		$date = substr( $text, $pos, 10 );
@@ -560,13 +578,13 @@ class Calendar
 	// returns null when no more token to come
 	private function _NextToken( &$text, &$pos )
 	{
-		$len = strlen($text);
+		$len = strlen( $text );
 		
 		// skip whitespaces
 		while( ($pos < $len) && ($text[$pos] == ' ') )
 			$pos++;
-		
-		// end of text...
+			
+			// end of text...
 		if( $pos >= $len )
 			return null;
 		
@@ -575,7 +593,7 @@ class Calendar
 		if( $text[$pos] == '[' )
 		{
 			$pos++; // pass the '['
-				
+			        
 			// get date FROM
 			$from = $this->GetDate( $text, $pos );
 			if( $from == null )
@@ -586,9 +604,10 @@ class Calendar
 			}
 			
 			// skip whitespaces
-			while( ($pos < $len) && ($text[$pos] == ' ') ) $pos++;
-			
-			// check for ;
+			while( ($pos < $len) && ($text[$pos] == ' ') )
+				$pos++;
+				
+				// check for ;
 			if( $text[$pos] != ';' )
 			{
 				// error
@@ -598,9 +617,10 @@ class Calendar
 			$pos++;
 			
 			// skip whitespaces
-			while( ($pos < $len) && ($text[$pos] == ' ') ) $pos++;
-			
-			// get date TO
+			while( ($pos < $len) && ($text[$pos] == ' ') )
+				$pos++;
+				
+				// get date TO
 			$to = $this->GetDate( $text, $pos );
 			if( $to == null )
 			{
@@ -610,9 +630,10 @@ class Calendar
 			}
 			
 			// skip whitespaces
-			while( ($pos < $len) && ($text[$pos] == ' ') ) $pos++;
-			
-			// check for ]
+			while( ($pos < $len) && ($text[$pos] == ' ') )
+				$pos++;
+				
+				// check for ]
 			if( $text[$pos] != ']' )
 			{
 				// error
@@ -622,14 +643,17 @@ class Calendar
 			$pos++;
 			
 			// return the period token
-			$token = array( 't_type'=>'p', 't_from'=>$from, 't_to'=>$to );
+			$token = array(
+					't_type' => 'p',
+					't_from' => $from,
+					't_to' => $to );
 			return $token;
 		}
 		
 		if( $text[$pos] == 'd' )
 		{
 			$pos++; // pass the 'd'
-				
+			        
 			// get number
 			$day = $this->GetDay( $text, $pos );
 			if( $day == null )
@@ -640,30 +664,35 @@ class Calendar
 			}
 			
 			// return day token
-			$token = array( 't_type'=>'d', 't_val'=>$day );
+			$token = array(
+					't_type' => 'd',
+					't_val' => $day );
 			return $token;
 		}
 		
 		// test for operator token
-		if( ($text[$pos]=='~') || ($text[$pos]=='&') || ($text[$pos]=='|') )
+		if( ($text[$pos] == '~') || ($text[$pos] == '&') || ($text[$pos] == '|') )
 		{
-			$token = array( 't_type'=>$text[$pos] );
+			$token = array(
+					't_type' => $text[$pos] );
 			$pos++;
 			return $token;
 		}
 		
 		// test for the 'always' token
-		if( $text[$pos]=='a' )
+		if( $text[$pos] == 'a' )
 		{
-			$token = array( 't_type'=>'a' );
+			$token = array(
+					't_type' => 'a' );
 			$pos++;
 			return $token;
 		}
 		
 		// test for the 'never' token
-		if( $text[$pos]=='n' )
+		if( $text[$pos] == 'n' )
 		{
-			$token = array( 't_type'=>'n' );
+			$token = array(
+					't_type' => 'n' );
 			$pos++;
 			return $token;
 		}
@@ -676,13 +705,13 @@ class Calendar
 			$pos = $len;
 			return null;
 		}
-		$token = array( 't_type'=>'p', 't_from'=>$date, 't_to'=>$date );
+		$token = array(
+				't_type' => 'p',
+				't_from' => $date,
+				't_to' => $date );
 		return $token;
 	}
 }
-
-
-
 
 class CalendarPeriod
 {
@@ -697,15 +726,17 @@ class CalendarPeriod
 	function Init( $from = null, $to = null )
 	{
 		$this->periods = array();
-		if( ($from!=null) && ($to!=null) )
-			$this->periods[] = array( $from, $to );
+		if( ($from != null) && ($to != null) )
+			$this->periods[] = array(
+					$from,
+					$to );
 	}
 	
 	// init as a week days unresolved period
 	function InitWeekDays( $day )
 	{
 		$this->days = array();
-		for( $i=0; $i<7; $i++ )
+		for( $i = 0; $i < 7; $i++ )
 			$this->days[$i] = 0;
 		$this->days[$day] = 1;
 	}
@@ -724,41 +755,46 @@ class CalendarPeriod
 			$out .= '[' . $period[0] . '->' . $period[1] . ']<br/>';
 		return $out;
 	}
-	
+
 	function GetBeautiful()
+	{
+		return $this->GetBeautifulEx( HLib( "LocaleInfo" )->GetLocale() );
+	}
+
+	function GetBeautifulEx( $locale )
 	{
 		if( is_null( $this->periods ) )
 			return "Unresolved days : " . implode( ",", $this->days );
 		
-		if( count($this->periods) == 0 )
-			return i18nStd( 'Never' );
-			
-		if( (count($this->periods)==1) && ($this->periods[0][0]==TIME_BEGIN) && ($this->periods[0][1]==TIME_END) )
-			return i18nStd( 'Always' );
-			
+		if( count( $this->periods ) == 0 )
+			return i18n( 'Never', $locale );
+		
+		if( (count( $this->periods ) == 1) && ($this->periods[0][0] == TIME_BEGIN) && ($this->periods[0][1] == TIME_END) )
+			return i18n( 'Always', $locale );
+		
 		$expr = '';
 		
-		for( $i=0; $i<count($this->periods); $i++ )
+		for( $i = 0; $i < count( $this->periods ); $i++ )
 		{
 			if( $this->periods[$i][0] == $this->periods[$i][1] )
-				$expr .= date2Display($this->periods[$i][0]);
+				$expr .= date2DisplayEx( $this->periods[$i][0], $locale );
 			else
 			{
 				if( $this->periods[$i][0] == TIME_BEGIN )
-					$expr .= i18nStd( 'until' ) . ' ' . date2Display($this->periods[$i][1]);
+					$expr .= i18n( 'until', $locale ) . ' ' . date2DisplayEx( $this->periods[$i][1], $locale );
 				else if( $this->periods[$i][1] == TIME_END )
-					$expr .= i18nStd( 'from' ) . ' ' . date2Display($this->periods[$i][0]);
+					$expr .= i18n( 'from', $locale ) . ' ' . date2DisplayEx( $this->periods[$i][0], $locale );
 				else
-					$expr .= i18nStd( 'DateRange', date2Display($this->periods[$i][0]), date2Display($this->periods[$i][1]) );
+					$expr .= i18n( 'DateRange', $locale, date2DisplayEx( $this->periods[$i][0], $locale ), date2DisplayEx( $this->periods[$i][1], $locale ) );
 			}
-				
-			if( $i < (count($this->periods)-1) )
+			
+			if( $i < (count( $this->periods ) - 1) )
 				$expr = $expr . ', ';
 		}
 		
 		return $expr;
 	}
-	
+
 	function GetExpression()
 	{
 		if( is_null( $this->periods ) )
@@ -772,20 +808,20 @@ class CalendarPeriod
 				$expr .= " d$value";
 				$nb++;
 			}
-			for( $i=0; $i<$nb-1; $i++ )
+			for( $i = 0; $i < $nb - 1; $i++ )
 				$expr .= " |";
 			return $expr;
 		}
 		
-		if( count($this->periods) == 0 )
+		if( count( $this->periods ) == 0 )
 			return 'n';
-			
-		if( (count($this->periods)==1) && ($this->periods[0][0]==TIME_BEGIN) && ($this->periods[0][1]==TIME_END) )
+		
+		if( (count( $this->periods ) == 1) && ($this->periods[0][0] == TIME_BEGIN) && ($this->periods[0][1] == TIME_END) )
 			return 'a';
-			
+		
 		$expr = '';
 		
-		for( $i=0; $i<count($this->periods); $i++ )
+		for( $i = 0; $i < count( $this->periods ); $i++ )
 		{
 			$expr .= '[' . $this->periods[$i][0] . ';' . $this->periods[$i][1] . '] ';
 			if( $i > 0 )
@@ -798,7 +834,7 @@ class CalendarPeriod
 	// returns true if the submitted date is included in the list of periods, false if not
 	function IsInside( $date )
 	{
-		if( $this>periods == null )
+		if( $this > periods == null )
 		{
 			if( $this->days[date_get_day( $date )] > 0 )
 				return true;
@@ -809,7 +845,7 @@ class CalendarPeriod
 		{
 			if( $period[0] > $date )
 				return false;
-			if( ($period[0]<=$date) && ($period[1]>=$date) )
+			if( ($period[0] <= $date) && ($period[1] >= $date) )
 				return true;
 		}
 		
@@ -829,13 +865,13 @@ class CalendarPeriod
 			if( $period[0] > $from )
 				return false;
 			
-			if( ( $from >= $period[0] ) && ( $to <= $period[1] ) )
+			if( ($from >= $period[0]) && ($to <= $period[1]) )
 				return true;
 		}
 		
 		return false;
 	}
-	
+
 	function GetNbDays()
 	{
 		if( is_null( $this->periods ) )
@@ -848,7 +884,7 @@ class CalendarPeriod
 		foreach( $this->periods as $period )
 		{
 			// number of seconds
-			$nbSec = (strtotime($period[1]) - strtotime($period[0]));
+			$nbSec = (strtotime( $period[1] ) - strtotime( $period[0] ));
 			
 			// add one because the period description is inclusive
 			$nbDays += 1 + $nbSec / 86400;
@@ -856,7 +892,7 @@ class CalendarPeriod
 		
 		return $nbDays;
 	}
-	
+
 	function GetNbNights()
 	{
 		if( is_null( $this->periods ) )
@@ -869,14 +905,14 @@ class CalendarPeriod
 		foreach( $this->periods as $period )
 		{
 			// number of seconds
-			$nbSec = (strtotime($period[1]) - strtotime($period[0]));
+			$nbSec = (strtotime( $period[1] ) - strtotime( $period[0] ));
 			
 			$nbNights += $nbSec / 86400;
 		}
 		
 		return $nbNights;
 	}
-	
+
 	function GetBoundaries( &$from, &$to )
 	{
 		if( is_null( $this->periods ) )
@@ -890,15 +926,15 @@ class CalendarPeriod
 		{
 			$from = TIME_BEGIN;
 			$to = TIME_BEGIN; // change made on the 2011-02-10, hope it doesn't break anyting...
-			//$to = TIME_END;
+			                  // $to = TIME_END;
 			return 0;
 		}
 		
 		$from = $this->periods[0][0];
-		$to = $this->periods[count($this->periods)-1][1];
+		$to = $this->periods[count( $this->periods ) - 1][1];
 		return 1;
 	}
-	
+
 	function GetLeastBoundaries( &$from, &$to )
 	{
 		if( is_null( $this->periods ) )
@@ -925,8 +961,8 @@ class CalendarPeriod
 	{
 		if( (!is_null( $this->days )) && (!is_null( $period->days )) )
 		{
-			for( $i=0; $i<7; $i++ )
-				$this->days[$i] = ( $this->days[$i] + $period->days[$i] ) >= 1 ? 1 : 0;
+			for( $i = 0; $i < 7; $i++ )
+				$this->days[$i] = ($this->days[$i] + $period->days[$i]) >= 1 ? 1 : 0;
 			return;
 		}
 		
@@ -945,7 +981,7 @@ class CalendarPeriod
 			}
 			
 			$from = $periods[0][0];
-			$to = $periods[count($periods)-1][1];
+			$to = $periods[count( $periods ) - 1][1];
 			
 			$toResolve->Resolve( $from, $to );
 		}
@@ -964,8 +1000,8 @@ class CalendarPeriod
 	{
 		if( (!is_null( $this->days )) && (!is_null( $period->days )) )
 		{
-			for( $i=0; $i<7; $i++ )
-				$this->days[$i] = ( $this->days[$i] + $period->days[$i] ) >= 2 ? 1 : 0;
+			for( $i = 0; $i < 7; $i++ )
+				$this->days[$i] = ($this->days[$i] + $period->days[$i]) >= 2 ? 1 : 0;
 			return;
 		}
 		
@@ -984,27 +1020,28 @@ class CalendarPeriod
 			}
 			
 			$from = $periods[0][0];
-			$to = $periods[count($periods)-1][1];
+			$to = $periods[count( $periods ) - 1][1];
 			
 			$toResolve->Resolve( $from, $to );
 		}
 		
-		//echo "Intersect " . $this->Out() . " with " . $period->Out() . "<br/>";
+		// echo "Intersect " . $this->Out() . " with " . $period->Out() . "<br/>";
 		
 		// intersect the two period list
 		$result = $this->_Intersect( $this->periods, $period->periods );
 		
 		$this->periods = $result;
 	}
-	
-	/** Trim last day of each period
-	 * 	Used for nights accommodations
-	 * 
+
+	/**
+	 * Trim last day of each period
+	 * Used for nights accommodations
+	 *
 	 * @author Laurent
 	 */
-	function TrimPeriods() 
+	function TrimPeriods()
 	{
-		foreach( $this->periods as $i => $period ) 
+		foreach( $this->periods as $i => $period )
 		{
 			if( $this->periods[$i][0] == $this->periods[$i][1] ) // One single day, delete period
 			{
@@ -1013,13 +1050,13 @@ class CalendarPeriod
 			}
 			
 			// Trim
-			$this->periods[$i][1] = date_add_day($this->periods[$i][1], -1);
+			$this->periods[$i][1] = date_add_day( $this->periods[$i][1], -1 );
 		}
 	}
-	
+
 	function UntrimPeriods()
 	{
-		for( $i=0; $i<count($this->periods); $i++ )
+		for( $i = 0; $i < count( $this->periods ); $i++ )
 		{
 			$this->periods[$i][1] = date_add_day( $this->periods[$i][1], 1 );
 		}
@@ -1030,23 +1067,26 @@ class CalendarPeriod
 	// starting from an unresolved periods, we build a resolved one, based on from and to parameters
 	function Resolve( $from, $to )
 	{
-		if( ! is_null( $this->periods ) )
+		if( !is_null( $this->periods ) )
 		{
 			// call on an already resolved CalendarPeriod
 			echo "LJLJKZHL KJH ELF B.EB EKJGF EFJBH EKLFJHL JGH <{{ : ' } <br/>";
 			return;
 		}
 		
-		//echo "Resolving from $from to $to " . implode( ".", $this->days ) . "<br/>";
+		// echo "Resolving from $from to $to " . implode( ".", $this->days ) . "<br/>";
 		
 		// if all days are selected, make a whole period
 		// build the micro periods
 		$nb = 0;
-		for( $i=0; $i<7; $i++ )
+		for( $i = 0; $i < 7; $i++ )
 			$nb += $this->days[$i];
 		if( $nb == 7 )
 		{
-			$this->periods = array( array( $from, $to ) );
+			$this->periods = array(
+					array(
+							$from,
+							$to ) );
 			return;
 		}
 		else if( $nb == 0 )
@@ -1055,42 +1095,46 @@ class CalendarPeriod
 			return;
 		}
 		
-		//echo "Continuing<br/>";
+		// echo "Continuing<br/>";
 		$fromDay = date_get_day( $from );
 		
 		// we have at least one gap
 		$groups = array();
 		$curGroup = null;
-		for( $i=$fromDay; $i<$fromDay+7; $i++ )
+		for( $i = $fromDay; $i < $fromDay + 7; $i++ )
 		{
 			if( $this->days[$i % 7] > 0 )
 			{
 				if( is_null( $curGroup ) ) // no group created yet
-					$curGroup = array( $i-$fromDay, $i-$fromDay );
-				else if( $curGroup[1] == $i-$fromDay - 1 ) // day jointed to current group
-					$curGroup[1] = $i-$fromDay;
+					$curGroup = array(
+							$i - $fromDay,
+							$i - $fromDay );
+				else if( $curGroup[1] == $i - $fromDay - 1 ) // day jointed to current group
+					$curGroup[1] = $i - $fromDay;
 				else // day disjointed from current group
 				{
 					$groups[] = $curGroup;
-					$curGroup = array( $i-$fromDay, $i-$fromDay );
+					$curGroup = array(
+							$i - $fromDay,
+							$i - $fromDay );
 				}
 			}
 		}
 		if( $curGroup != null )
 			$groups[] = $curGroup;
-		
-		//Dump( $groups );
-		
+			
+			// Dump( $groups );
+			
 		// now generate the periods
 		$msg = "Starts on $from, which day is a $fromDay<br/>";
 		foreach( $groups as $group )
 			$msg .= "Group : " . implode( " to ", $group ) . "<br/>";
-		
-		//echo "From day : $from : $fromDay <br/>";
+			
+			// echo "From day : $from : $fromDay <br/>";
 		
 		$firstOccurence = $from;
 		
-		//echo "First occurence : $firstOccurence<br/>";
+		// echo "First occurence : $firstOccurence<br/>";
 		
 		$this->days = null;
 		$this->periods = array();
@@ -1100,23 +1144,25 @@ class CalendarPeriod
 			// day of $firstOccurence is always $fromDay
 			foreach( $groups as $group )
 			{
-				$mpFrom = date_add_day($firstOccurence,$group[0]);
+				$mpFrom = date_add_day( $firstOccurence, $group[0] );
 				if( $mpFrom <= $to )
 				{
-					$mpTo = date_add_day($firstOccurence,$group[1]);
+					$mpTo = date_add_day( $firstOccurence, $group[1] );
 					if( $mpTo > $to )
 						$mpTo = $to;
-						
+					
 					$msg .= "Adding $mpFrom, $mpTo<br/>";
-						
-					$this->periods[] = array( $mpFrom, $mpTo );
+					
+					$this->periods[] = array(
+							$mpFrom,
+							$mpTo );
 				}
 			}
 			
 			$firstOccurence = date_add_day( $firstOccurence, 7 );
 		}
 		
-		//HLib("ServerState")->AddMessage( $msg );
+		// HLib("ServerState")->AddMessage( $msg );
 	}
 	
 	// NOT operator
@@ -1124,7 +1170,7 @@ class CalendarPeriod
 	{
 		if( is_null( $this->periods ) )
 		{
-			for( $i=0; $i<7; $i++ )
+			for( $i = 0; $i < 7; $i++ )
 				$this->days[$i] = $this->days[$i] > 0 ? 0 : 1;
 			return;
 		}
@@ -1134,13 +1180,17 @@ class CalendarPeriod
 		$curBegin = TIME_BEGIN;
 		foreach( $this->periods as $period )
 		{
-			if( ( date_add_day( $period[0], -1 ) ) >= $curBegin )
-				$result[] = array( $curBegin, date_add_day( $period[0], -1 ) );
+			if( (date_add_day( $period[0], -1 )) >= $curBegin )
+				$result[] = array(
+						$curBegin,
+						date_add_day( $period[0], -1 ) );
 			$curBegin = date_add_day( $period[1], 1 );
 		}
 		
 		if( TIME_END >= $curBegin )
-			$result[] = array( $curBegin, TIME_END );
+			$result[] = array(
+					$curBegin,
+					TIME_END );
 		
 		$this->periods = $result;
 	}
@@ -1156,22 +1206,24 @@ class CalendarPeriod
 		$i = 0;
 		$j = 0;
 		
-		while( $i<$count1 && $j<$count2 )
+		while( $i < $count1 && $j < $count2 )
 		{
 			// one of the periods begins after the end of the other
 			if( $periods1[$i][0] > $periods2[$j][1] )
-			{	// period 1 begins after period 2 finishes => period2 is eliminated !
+			{ // period 1 begins after period 2 finishes => period2 is eliminated !
 				$j++;
 			}
 			else if( $periods2[$j][0] > $periods1[$i][1] )
-			{	// period 2 begins after end of period 1 => period 1 is eliminated !
+			{ // period 2 begins after end of period 1 => period 1 is eliminated !
 				$i++;
 			}
 			
 			// after that test, we can assume there is a non-void intersection
 			else
 			{
-				$result[] = array( max($periods1[$i][0],$periods2[$j][0]), min($periods1[$i][1],$periods2[$j][1]) );
+				$result[] = array(
+						max( $periods1[$i][0], $periods2[$j][0] ),
+						min( $periods1[$i][1], $periods2[$j][1] ) );
 				
 				if( $periods1[$i][1] > $periods2[$j][1] )
 					$j++;
@@ -1193,7 +1245,7 @@ class CalendarPeriod
 		
 		$i = 0;
 		$j = 0;
-		while( $i<$count1 && $j<$count2 )
+		while( $i < $count1 && $j < $count2 )
 		{
 			if( $periods1[$i][0] <= $periods2[$j][0] )
 			{
@@ -1228,8 +1280,8 @@ class CalendarPeriod
 		$count = count( $periods );
 		if( $count == 0 )
 			return $result;
-		
-		// copy the first period
+			
+			// copy the first period
 		$result[] = $periods[0];
 		
 		// init
@@ -1261,7 +1313,7 @@ class CalendarPeriodAssociative
 {
 	// list of untouching periods in chronological order
 	var $periods = array(); // 0:from, 1:to, 2:value
-	
+	                        
 	// init from a CalendarPeriod with a value
 	function Init( CalendarPeriod $period, $value )
 	{
@@ -1310,7 +1362,9 @@ class CalendarPeriodAssociative
 	{
 		$periods = array();
 		foreach( $this->periods as $p )
-			$periods[] = array( $p[0], $p[1] );
+			$periods[] = array(
+					$p[0],
+					$p[1] );
 		
 		$res = new CalendarPeriod();
 		// use merge to merge jointed periods...
@@ -1348,22 +1402,25 @@ class CalendarPeriodAssociative
 		$i = 0;
 		$j = 0;
 		
-		while( $i<$count1 && $j<$count2 )
+		while( $i < $count1 && $j < $count2 )
 		{
 			// one of the periods begins after the end of the other
 			if( $this->periods[$i][0] > $calendarPeriod->periods[$j][1] )
-			{	// period 1 begins after period 2 finishes => period2 is eliminated !
+			{ // period 1 begins after period 2 finishes => period2 is eliminated !
 				$j++;
 			}
 			else if( $calendarPeriod->periods[$j][0] > $this->periods[$i][1] )
-			{	// period 2 begins after end of period 1 => period 1 is eliminated !
+			{ // period 2 begins after end of period 1 => period 1 is eliminated !
 				$i++;
 			}
 			
 			// after that test, we can assume there is a non-void intersection
 			else
 			{
-				$result[] = array( max($this->periods[$i][0],$calendarPeriod->periods[$j][0]), min($this->periods[$i][1],$calendarPeriod->periods[$j][1]), $this->periods[$i][2] );
+				$result[] = array(
+						max( $this->periods[$i][0], $calendarPeriod->periods[$j][0] ),
+						min( $this->periods[$i][1], $calendarPeriod->periods[$j][1] ),
+						$this->periods[$i][2] );
 				
 				if( $this->periods[$i][1] > $calendarPeriod->periods[$j][1] )
 					$j++;
@@ -1388,7 +1445,7 @@ class CalendarPeriodAssociative
 		
 		$i = 0;
 		$j = 0;
-		while( $i<$count1 && $j<$count2 )
+		while( $i < $count1 && $j < $count2 )
 		{
 			if( $periods1[$i][0] <= $periods2[$j][0] )
 			{
@@ -1423,7 +1480,7 @@ class CalendarPeriodAssociative
 			return array();
 		if( $count == 1 )
 			return $periods;
-			
+		
 		$result = array();
 		
 		while( count( $periods ) > 1 )
@@ -1439,7 +1496,10 @@ class CalendarPeriodAssociative
 				
 				if( $periods[0][0] < $periods[1][0] )
 				{
-					$created = array( $periods[0][0], date_add_day( $periods[1][0], -1 ), $periods[0][2] );
+					$created = array(
+							$periods[0][0],
+							date_add_day( $periods[1][0], -1 ),
+							$periods[0][2] );
 					$toAdd[] = $created;
 				}
 				
@@ -1448,17 +1508,26 @@ class CalendarPeriodAssociative
 					$r = $addFunction( $periods[0][2], $periods[1][2] );
 					if( is_null( $r ) )
 						return null;
-						
-					$toAdd[] = array( $periods[1][0], $periods[1][1], $r );
-					$toAdd[] = array( date_add_day( $periods[1][1], 1 ), $periods[0][1], $periods[0][2] );
+					
+					$toAdd[] = array(
+							$periods[1][0],
+							$periods[1][1],
+							$r );
+					$toAdd[] = array(
+							date_add_day( $periods[1][1], 1 ),
+							$periods[0][1],
+							$periods[0][2] );
 				}
 				else if( $periods[1][1] == $periods[0][1] )
 				{
 					$r = $addFunction( $periods[0][2], $periods[1][2] );
 					if( is_null( $r ) )
 						return null;
-						
-					$toAdd[] = array( $periods[1][0], $periods[1][1], $r );
+					
+					$toAdd[] = array(
+							$periods[1][0],
+							$periods[1][1],
+							$r );
 				}
 				else // $periods[1][1] > $periods[0][1]
 				{
@@ -1466,8 +1535,14 @@ class CalendarPeriodAssociative
 					if( is_null( $r ) )
 						return null;
 					
-					$toAdd[] = array( $periods[1][0], $periods[0][1], $r );
-					$toAdd[] = array( date_add_day( $periods[0][1], 1 ), $periods[1][1], $periods[1][2] );
+					$toAdd[] = array(
+							$periods[1][0],
+							$periods[0][1],
+							$r );
+					$toAdd[] = array(
+							date_add_day( $periods[0][1], 1 ),
+							$periods[1][1],
+							$periods[1][2] );
 				}
 				
 				// periods 0 and 1 should be replaced by the newly calculated $toAdd periods
