@@ -1,9 +1,9 @@
 <?php
 
 /*
- * A Page has a method Execute to handle http requests.
+ * A Page processes http request and outputs something in the std out
  * 
- * It processes the request and outputs something in the std out
+ * It has a method Execute to handle http requests.
  * 
  * The PageConnector pre-processes the http request in order to find
  * which page to load and to initialize it with the global db and qpath
