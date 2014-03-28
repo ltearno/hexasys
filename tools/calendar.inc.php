@@ -156,7 +156,6 @@ function push( &$arr, &$elem )
 
 class Calendar
 {
-
 	function Parse( $expression )
 	{
 		$tree = $this->_Parse( $expression );
