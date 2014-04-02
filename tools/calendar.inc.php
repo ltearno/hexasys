@@ -100,6 +100,11 @@ function now()
 	return date( 'Y-m-d', strtotime( 'now' ) );
 }
 
+function today()
+{
+	return date( 'Y-m-d', strtotime( 'now' ) );
+}
+
 function nowtime()
 {
 	return date( "Y-m-d H:i:s", strtotime( 'now' ) );
