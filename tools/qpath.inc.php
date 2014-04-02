@@ -10,6 +10,19 @@ function QPathQueryFieldList( $table, $fields )
 	return implode( " ", $res ) . " ";
 }
 
+function QPathQueryFieldListEx( $tableAndFields )
+{
+	$res = array();
+	
+	foreach( $tableAndFields as $table => $fields )
+	{
+		foreach( $fields as $field )
+			$res[] = "F[$table.$field as `$table.$field`]";
+	}
+
+	return implode( " ", $res ) . " ";
+}
+
 class QPathParamQuery
 {
 	var $QPath;
