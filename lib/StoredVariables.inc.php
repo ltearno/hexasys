@@ -43,6 +43,24 @@ class StoredVariables extends HexaComponentImpl
 		fclose( $file );
 	}
 	
+	public function ReadBinary( $domainUID, $variableName )
+	{
+		$fileName = $this->getVariableFileName( $domainUID, $variableName );
+		
+		$content = @file_get_contents( $fileName );
+		if( $content === FALSE )
+			return null;
+		return unserialize($content);
+	}
+	
+	public function StoreBinary( $domainUID, $variableName, $variableValue )
+	{
+		$fileName = $this->getVariableFileName( $domainUID, $variableName );
+		
+		$content = serialize( $variableValue );
+		@file_put_contents( $fileName, $content );
+	}
+	
 	public function Remove( $domainUID, $variableName )
 	{
 		$fileName = $this->getVariableFileName( $domainUID, $variableName );
