@@ -159,6 +159,9 @@ function push( &$arr, &$elem )
 	$arr[] = $elem;
 }
 
+$treeCache = array();
+$flatCache = array();
+
 class Calendar
 {
 	function Parse( $expression )
@@ -204,8 +207,13 @@ class Calendar
 			throw new BadMethodCallException( "", 42, null );
 		
 		$trim->UntrimPeriods();
-		$daySpealingExpression = $trim->GetExpression();
-		return $daySpealingExpression;
+		$daySpeakingExpression = $trim->GetExpression();
+		return $daySpeakingExpression;
+	}
+	
+	function IsEmpty( $tree )
+	{
+		return $this->GetFlat( $tree )->IsEmpty();
 	}
 	
 	// returns the number of days contained in this period
@@ -354,6 +362,11 @@ class Calendar
 
 	function GetFlatInternal( $tree )
 	{
+		global $flatCache;
+		
+		if( isset($tree["_expression_"]) && isset($flatCache[$tree["_expression_"]]) )
+			return $flatCache[$tree["_expression_"]];
+			
 		// on commence par la racine
 		$stack = array();
 		array_push( $stack, new RefHolder( $tree ) );
@@ -436,7 +449,12 @@ class Calendar
 			}
 		}
 		
-		return $nodeRef->ref['flat'];
+		$res = $nodeRef->ref['flat'];
+		
+		if( isset($tree["_expression_"]) )
+			$flatCache[$tree["_expression_"]] = $res;
+		
+		return $res;
 	}
 
 	private function _GetBoundaries( $tree, &$from, &$to )
@@ -452,6 +470,11 @@ class Calendar
 
 	private function _Parse( $expression )
 	{
+		global $treeCache;
+		
+		if( $treeCache!=null && isset($treeCache[$expression]) )
+			return $treeCache[$expression];
+		
 		$pos = 0;
 		
 		$stack = array();
@@ -500,6 +523,9 @@ class Calendar
 		
 		if( count( $stack ) != 1 )
 			return null;
+		
+		$treeCache[$expression] = $stack[0];
+		$treeCache[$expression]["_expression_"] = $expression;
 		
 		return $stack[0];
 	}
@@ -731,9 +757,7 @@ class CalendarPeriod
 	{
 		$this->periods = array();
 		if( ($from != null) && ($to != null) )
-			$this->periods[] = array(
-					$from,
-					$to );
+			$this->periods[] = array( $from, $to );
 	}
 	
 	// init as a week days unresolved period
@@ -874,6 +898,11 @@ class CalendarPeriod
 		}
 		
 		return false;
+	}
+	
+	function IsEmpty()
+	{
+		return count( $this->periods ) == 0;
 	}
 
 	function GetNbDays()
