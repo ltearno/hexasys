@@ -1,10 +1,6 @@
 <?php
 
-
-
-
-
-class page_schema extends PageMVCSecure
+class page_dump extends PageMVCSecure
 {
 	public function Run( $params, $posts, &$view_data, &$message )
 	{

@@ -1,14 +1,10 @@
 <?php
 
-class page_schemaUpdate extends PageMVC
+class page_update extends PageMVC
 {
 	public function Run( $params, $posts, &$view_data, &$message )
 	{
 		$params = array_merge( $params, $posts );
-		
-		/*
-			Database creation
-		*/
 		
 		echo "<h1>Database update</h1>";
 		
