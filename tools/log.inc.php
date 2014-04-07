@@ -30,6 +30,11 @@ class Logger
 		$this->logFile = null;
 	}
 	
+	public function LogRaw( $msg )
+	{
+		fwrite( $this->logFile, $msg . "\r\n" );
+	}
+	
 	public function Log( $logLevel, $msg = null )
 	{
 		if( $msg == null )
@@ -41,19 +46,7 @@ class Logger
 		if( $logLevel < $this->logLevel )
 			return;
 		
-		// allows to use variable arguments
-		//$args = func_get_args();
-		//array_shift( $args ); // skip the $logLevel arg
-		//$msg = call_user_func_array( 'sprintf', $args );
-		
 		fwrite( $this->logFile, $logLevel . ' ' . Date( 'Y-m-d h:i:s' ) . ' ' . $msg . "\r\n" );
-		
-		/*$this->nbNotFlushed++;
-		if( $this->nbNotFlushed > 20 )
-		{
-			fflush( $this->logFile );
-			$this->nbNotFlushed = 0;
-		}*/
 	}
 }
 
