@@ -47,6 +47,9 @@ function getArrayField( $json, $path )
 
 function setArrayField( &$json, $path, $value )
 {
+	if( $json == null )
+		$json = array();
+	
 	$current = & $json;
 	$parts = explode( ".", $path );
 
