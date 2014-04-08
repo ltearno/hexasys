@@ -24,6 +24,45 @@ function json2string( $json )
 	return json_encode( $json );
 }
 
+function getArrayField( $json, $path )
+{
+	$current = $json;
+	$parts = explode( ".", $path );
+
+	while( count( $parts ) > 1 )
+	{
+		// maybe info does not exist
+		if( ! isset( $current[$parts[0]] ) )
+			return null;
+		
+		$current = $current[$parts[0]];
+		array_shift( $parts );
+	}
+	
+	if( isset( $current[$parts[0]] ) )
+		return $current[$parts[0]];
+	
+	return null;
+}
+
+function setArrayField( &$json, $path, $value )
+{
+	$current = & $json;
+	$parts = explode( ".", $path );
+
+	while( count( $parts ) > 1 )
+	{
+		// maybe info does not exist
+		if( ! ( isset( $current[$parts[0]] ) && is_array( $current[$parts[0]] ) ) )
+			$current[$parts[0]] = array();
+		
+		$current = & $current[$parts[0]];
+		array_shift( $parts );
+	}
+	
+	$current[$parts[0]] = $value;
+}
+
 function array2string( $array )
 {
 	$s = "";
