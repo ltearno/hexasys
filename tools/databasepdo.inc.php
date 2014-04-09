@@ -349,12 +349,6 @@ class Database
 			else
 				$this->pdo->exec( "ROLLBACK TO SAVEPOINT $currentTransactionId" );
 		}
-		
-		if( ! $currentTransactionStatus )
-		{
-			$this->logger->Log( Logger::LOG_WRN, "TRANSACTION '$currentTransactionId' Rollbacked" );
-			$this->logger->Log( Logger::LOG_WRN, GetDump( debug_backtrace() ) );
-		}
 	}
 	
 	//

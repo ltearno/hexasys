@@ -485,20 +485,17 @@ class QPath
     public function StartTransaction()
     {
         $transactionId = $this->db->StartTransaction();
-        $this->logger->Log( Logger::LOG_MSG, "STARTED TX $transactionId" );
         return $transactionId;
     }
 
     function CloseTransaction( $transactionId )
     {
         $this->db->CloseTransaction( $transactionId );
-        $this->logger->Log( Logger::LOG_MSG, "CLOSED TX $transactionId" );
     }
 
     function AbortTransaction()
     {
         $this->db->AbortTransaction();
-        $this->logger->Log( Logger::LOG_MSG, "ABORTED TX" );
     }
 	
 	function Parse( $expression, $whereStatement=null )
