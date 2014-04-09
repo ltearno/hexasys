@@ -364,8 +364,8 @@ class Calendar
 	{
 		global $flatCache;
 		
-		if( isset($tree["_expression_"]) && isset($flatCache[$tree["_expression_"]]) )
-			return $flatCache[$tree["_expression_"]];
+// 		if( isset($tree["_expression_"]) && isset($flatCache[$tree["_expression_"]]) )
+// 			return $flatCache[$tree["_expression_"]];
 			
 		// on commence par la racine
 		$stack = array();
@@ -451,8 +451,8 @@ class Calendar
 		
 		$res = $nodeRef->ref['flat'];
 		
-		if( isset($tree["_expression_"]) )
-			$flatCache[$tree["_expression_"]] = $res;
+// 		if( isset($tree["_expression_"]) )
+// 			$flatCache[$tree["_expression_"]] = $res;
 		
 		return $res;
 	}
@@ -472,8 +472,8 @@ class Calendar
 	{
 		global $treeCache;
 		
-		if( $treeCache!=null && isset($treeCache[$expression]) )
-			return $treeCache[$expression];
+		//if( $treeCache!=null && isset($treeCache[$expression]) )
+		//	return $treeCache[$expression];
 		
 		$pos = 0;
 		
