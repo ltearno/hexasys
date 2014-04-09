@@ -482,22 +482,23 @@ class QPath
 		return $this->db->Query( $query );
 	}
 
-    function StartTransaction()
+    public function StartTransaction()
     {
-		$this->logger->Log( Logger::LOG_MSG, 'START TRANSACTION' );
-        $this->db->BeginTransaction();
+        $transactionId = $this->db->StartTransaction();
+        $this->logger->Log( Logger::LOG_MSG, "STARTED TX $transactionId" );
+        return $transactionId;
     }
 
-    function Commit()
+    function CloseTransaction( $transactionId )
     {
-		$this->logger->Log( Logger::LOG_MSG, 'COMMIT' );
-        $this->db->Commit();
+        $this->db->CloseTransaction( $transactionId );
+        $this->logger->Log( Logger::LOG_MSG, "CLOSED TX $transactionId" );
     }
 
-    function Rollback()
+    function AbortTransaction()
     {
-		$this->logger->Log( Logger::LOG_MSG, 'ROLLBACK' );
-        $this->db->Rollback();
+        $this->db->AbortTransaction();
+        $this->logger->Log( Logger::LOG_MSG, "ABORTED TX" );
     }
 	
 	function Parse( $expression, $whereStatement=null )

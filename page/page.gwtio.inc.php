@@ -102,10 +102,10 @@ abstract class PageGWTIO extends PageImpl
 			
 			$debug = HLib("LocaleInfo")->GetLocale() == "debug";
 			
+			$transactionId = $this->QPath->StartTransaction();
+			
 			try
 			{
-				//$this->QPath->StartTransaction();
-				
 				$doCall = true;
 				if( $method == "_hang_out_reply_" )
 					$doCall = HLib("HangOut")->ProcessReply( $method, $parameters );
@@ -129,8 +129,6 @@ abstract class PageGWTIO extends PageImpl
 						$log->Term();
 					}
 				}
-				
-				//$this->QPath->Commit();
 			}
 			catch( SecurityException $e )
 			{
@@ -139,23 +137,27 @@ abstract class PageGWTIO extends PageImpl
 				
 				$res = null;
 				
-				//$this->QPath->Rollback();
+				$this->QPath->AbortTransaction();
 			}
 			catch( HangOutException $e )
 			{
 				$logger->Log( Logger::LOG_MSG, "RAISES HANGOUT EXCEPTION" );
 				$hangOutCode = HLib("HangOut")->ProcessException( $e, $service, $method, $parameters );
 				
-				//$this->QPath->Rollback();
+				$this->QPath->AbortTransaction();
 			}
 			catch( Exception $e )
 			{
-				//$this->QPath->Rollback();
+				$this->QPath->AbortTransaction();
+				$this->QPath->CloseTransaction( $transactionId );
 				
 				// relaunch the exception
 				echo "Exception catched and rethown : " . $e->getMessage() . "<br/>";
 				throw $e;
 			}
+			
+			//$this->QPath->AbortTransaction();
+			$this->QPath->CloseTransaction( $transactionId );
 			
 			$result[] = array( HLib("ServerState")->GetLevel(), HLib("ServerState")->GetMessage(), $hangOutCode, $res );
 		}

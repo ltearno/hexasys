@@ -24,8 +24,6 @@ class Database
 	
 	var $logger = null;
 	
-	var $txLevel = 0; // number of nested transactions simulated
-	
 	public function Init( $options )
 	{
 		//$this->host		= array_key_exists('host', $options)	? $options['host']		: $this->host;
@@ -286,52 +284,77 @@ class Database
 	// Transactions
 	//
 	
-	public function BeginTransaction()
+	var $transactionStack = array();
+	
+	public function StartTransaction()
 	{
 		$this->FreeResult();
 		
-		// nested transactions are forbidden in pdo mode
-		$this->txLevel++;
-		if( $this->txLevel > 1 )
-			return true;
+		if( count( $this->transactionStack ) == 0 )
+		{
+			// main tx level, start a transaction
+			$transactionId = "main";
+			$this->pdo->exec( "START TRANSACTION" );
+		}
+		else
+		{
+			// nested transaction : use SAVEPOINTs, this requires InnoDB engine
+			$transactionId = "tx_" . count( $this->transactionStack );
+			$this->pdo->exec( "SAVEPOINT $transactionId" );
+		}
 		
-		$res = $this->pdo->beginTransaction();
-		if( ! $res )
-			$this->Error( "When doing BeginTransaction" );
+		$this->transactionStack[] = array( "tx_id" => $transactionId, "status" => true );
 		
-		return $res;
+		return $transactionId;
 	}
 	
-	public function Rollback()
+	public function AbortTransaction()
 	{
 		$this->FreeResult();
 		
-		// nested transactions are forbidden in pdo mode
-		$this->txLevel--;
-		if( $this->txLevel > 0 )
-			return true;
+		if( count( $this->transactionStack ) == 0 )
+			throw new Exception( "Called AbortTransaction while no transaction was started !" );
 		
-		$res = $this->pdo->rollBack();
-		if( ! $res )
-			$this->Error( "When doing RollBack" );
+		// save the current transaction's status
+		$this->transactionStack[count($this->transactionStack)-1]["status"] = false;
 		
-		return $res;
+		return true;
 	}
 	
-	public function Commit()
+	public function CloseTransaction( $transactionId )
 	{
 		$this->FreeResult();
 		
-		// nested transactions are forbidden in pdo mode
-		$this->txLevel--;
-		if( $this->txLevel > 0 )
-			return true;
-	
-		$res = $this->pdo->commit();
-		if( ! $res )
-			$this->Error( "When doing Commit" );
-	
-		return $res;
+		if( count( $this->transactionStack ) == 0 )
+			throw new Exception( "Called CloseTransaction while a transaction was not started !" );
+		
+		$currentTransactionInfo = array_pop( $this->transactionStack );
+		$currentTransactionId = $currentTransactionInfo["tx_id"];
+		$currentTransactionStatus = $currentTransactionInfo["status"];
+		
+		if( $currentTransactionId != $transactionId )
+			throw new Exception( "Called CloseTransaction on tx_id '$transactionId' but the current tx_id is '$currentTransactionId'" );
+		
+		if( $currentTransactionId == "main" )
+		{
+			if( $currentTransactionStatus )
+				$this->pdo->exec( "COMMIT" );
+			else
+				$this->pdo->exec( "ROLLBACK" );
+		}
+		else
+		{
+			if( $currentTransactionStatus )
+				$this->pdo->exec( "RELEASE SAVEPOINT $currentTransactionId" );
+			else
+				$this->pdo->exec( "ROLLBACK TO SAVEPOINT $currentTransactionId" );
+		}
+		
+		if( ! $currentTransactionStatus )
+		{
+			$this->logger->Log( Logger::LOG_WRN, "TRANSACTION '$currentTransactionId' Rollbacked" );
+			$this->logger->Log( Logger::LOG_WRN, GetDump( debug_backtrace() ) );
+		}
 	}
 	
 	//
@@ -358,6 +381,7 @@ class Database
 			$this->pdo->exec('SET NAMES utf8;');
 			$this->pdo->exec("SET @@session.sql_mode= 'NO_ENGINE_SUBSTITUTION';");
 			$this->pdo->exec("SET time_zone = '+0:00';");
+			$this->pdo->exec( "SET autocommit=0" );
 			
 			return true;
 		}
