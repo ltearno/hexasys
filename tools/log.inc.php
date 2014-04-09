@@ -12,6 +12,7 @@ class Logger
 	
 	var $logFile = null;
 	var $logLevel = 0;
+	var $logId = 0;
 	
 	var $nbNotFlushed = 0;
 	
@@ -22,6 +23,7 @@ class Logger
 			
 		$this->logFile = fopen( $logDir . '/' . $fileName, 'a' );
 		$this->logLevel = $logLevel;
+		$this->logId = uniqid();
 	}
 	
 	public function Term()
@@ -46,7 +48,7 @@ class Logger
 		if( $logLevel < $this->logLevel )
 			return;
 		
-		fwrite( $this->logFile, $logLevel . ' ' . Date( 'Y-m-d h:i:s' ) . ' ' . $msg . "\r\n" );
+		fwrite( $this->logFile, $logLevel . ' ' . Date( 'Y-m-d h:i:s' ) . ' ' . $this->logId . ' ' . $msg . "\r\n" );
 	}
 }
 
