@@ -375,7 +375,7 @@ class Database
 			$this->pdo->exec('SET NAMES utf8;');
 			$this->pdo->exec("SET @@session.sql_mode= 'NO_ENGINE_SUBSTITUTION';");
 			$this->pdo->exec("SET time_zone = '+0:00';");
-			$this->pdo->exec( "SET autocommit=0" );
+			//$this->pdo->exec( "SET autocommit=0" );
 			
 			return true;
 		}
