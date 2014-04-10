@@ -211,8 +211,6 @@ function CreateThumbnail( $type, $srcFile, $destFile, $width, $height )
 	$srcImgW = imageSX( $srcImg );
 	$srcImgH = imageSY( $srcImg );
 	
-	$size = array( $srcImgW, $srcImgH );
-	
 	if( $srcImgW > $srcImgH )
 	{
 		$dstImgW = $width;
@@ -234,32 +232,10 @@ function CreateThumbnail( $type, $srcFile, $destFile, $width, $height )
 	else if( $type == 'png' )
 		imagepng( $dstImg, $destFile );
 	
-	// optionally prevent the original picture to be too big...
-/*	if( ($srcImgW>640) || ($srcImgH>480) )
-	{
-		// need to also resize the original...
-		$dX = 640;
-		$dY = 480;
-		if( $srcImgW > $srcImgH )
-			$dY = $srcImgH * ( $dX / $srcImgW );
-		else
-			$dX = $srcImgW * ( $dY / $srcImgH );
-		
-		$replaceImg = ImageCreateTrueColor( $dX, $dY );
-		imagecopyresampled( $replaceImg, $srcImg, 0, 0, 0, 0, $dX, $dY, $srcImgW, $srcImgH );
-		
-		if( $type == 'jpeg' )
-			imagejpeg( $replaceImg, $srcFile );
-		else if( $type == 'png' )
-			imagepng( $replaceImg, $srcFile );
-		
-		imagedestroy( $replaceImg ); 
-	}*/
-	
 	imagedestroy( $srcImg ); 
 	imagedestroy( $dstImg ); 
 	
-	return $size;
+	return array( $srcImgW, $srcImgH );
 }
 
 function getStackTrace( $pass = 2 )
