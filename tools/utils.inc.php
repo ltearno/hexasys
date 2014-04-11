@@ -261,12 +261,13 @@ function getStackTrace( $pass = 2 )
 		else
 			$spec = $call['function'];
 
-		$args = array();
-		foreach( $call['args'] as $arg )
-			$args[] = DumpCodeCompact( $arg );
-		$args = implode( ",", $args );
+// 		$args = array();
+// 		foreach( $call['args'] as $arg )
+// 			$args[] = DumpCodeCompact( $arg );
+// 		$args = implode( ",", $args );
 
-		$out[] = "$spec($args)\t$location";
+		//$out[] = "$spec($args)\t$location";
+		$out[] = "$spec\t$location";
 	}
 
 	return implode( "\r\n", $out );
