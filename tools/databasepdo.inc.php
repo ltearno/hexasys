@@ -128,41 +128,26 @@ class Database
 			return null;
 		}
 		
-		/*
-		 * This is really bad code, needs to be improved...
-		 * When wanting to create a trigger, PDO doesnt manage to handle requests with ';' inside
-		 */
-		
-		$connection = mysql_connect( $this->host, $this->user, $this->password, true );
-		$res = mysql_query( 'SET NAMES UTF8', $connection );
-		if( ! $res )
-			return false;
-		
-		$res = mysql_select_db( $this->database, $connection );
-		if( ! $res )
-			return false;
-		
-		$res = mysql_query( $sql, $connection );
-		if( ! $res )
+		$this->statement = $this->pdo->prepare( $sql );
+		if( $this->statement == null )
 		{
-			$errNo = mysql_errno( $connection );
-			$errMsg = mysql_error( $connection );
-			
-			echo "ERROR DDL: $errNo : $errMsg<br/>";
-			
-			$this->logger->Log( Logger::LOG_ERR, "ERROR DDL: $errNo : $errMsg" );
-			
-			$this->logger->Log( Logger::LOG_ERR, "  When doing query $sql" );
-		
-			//$this->logger->Log( Logger::LOG_ERR, GetDump( debug_backtrace( FALSE ) ) );
-			
-			return false;
+			$this->logger->Log( Logger::LOG_ERR, "QUERY_DDL : $sql" );
+			$this->Error( "When doing QueryDdl( $sql )" );
+				
+			return null;
 		}
-		// echo "ERROR SQL: " . mysql_errno( $connection ) . ' : ' . mysql_error( $connection ) . "<br/>";
 		
-		mysql_close( $connection );
+		$res = $this->statement->execute();
+		$this->statement = null;
+		if( $res === false )
+		{
+			$this->logger->Log( Logger::LOG_ERR, 'QUERY_DDL : ' . $sql );
+			$this->Error( "When doing QueryDdl( $sql )" );
+				
+			return null;
+		}
 		
-		return $res;
+		return true;
 	}
 	
 	public function Query( $sql )
