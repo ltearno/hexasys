@@ -811,12 +811,23 @@ class QPath
 			// if token is [ then produce the string going until next ]
 			if( $text[$pos] == '[' )
 			{
+				$nbToSkip = 0;
+				
 				$pos++; // pass the [
 				$i = 0;
 				while( ($pos+$i) < $len )
 				{
+					if( $text[$pos+$i] == '[' )
+						$nbToSkip++;
+					
 					if( $text[$pos+$i] == ']' )
-						break;
+					{
+						if( $nbToSkip == 0 )
+							break;
+						else
+							$nbToSkip--;
+					}
+					
 					$i++;
 				}
 				$tokString = array( 't_type'=>'s', 't_val'=>rtrim(substr($text,$pos,$i)) );
