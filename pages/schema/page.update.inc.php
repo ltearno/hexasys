@@ -1,6 +1,6 @@
 <?php
 
-class page_update extends PageMVC
+class page_update extends PageMVCSecure
 {
 	public function Run( $params, $posts, &$view_data, &$message )
 	{
