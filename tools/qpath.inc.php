@@ -765,7 +765,7 @@ class QPath
 	// returns the next token and increments the position
 	// returns null when no more token to come
     var $tokens = array( '(', ')', '[', ']', '{', '}', '?', 'G', 'F', 'O' );
-    function _IsToken( $c )
+    function _IsToken( $c, $nextC )
     {
         switch( $c )
         {
@@ -776,11 +776,13 @@ class QPath
             case '{':
             case '}':
             case '?':
+            	return true;
             case 'G':
 			case 'A':
             case 'F':
             case 'O':
-                return true;
+            	if( $nextC == "[" )
+                	return true;
         }
         return false;
     }
@@ -804,7 +806,7 @@ class QPath
 		// test one char tokens
 		$tokenSize = 1;
 		//if( in_array( $text[$pos], $tokens ) )
-        if( $this->_IsToken( $text[$pos] ) )
+        if( $this->_IsToken( $text[$pos], ($pos+1<$len?$text[$pos+1]:null) ) )
 		{
 			$token = array( 't_type' => $text[$pos] );
 			
@@ -855,7 +857,7 @@ class QPath
 			{
 				$c = $text[$pos+$i];
 				//if( in_array( $c, $tokens ) )
-                if( $this->_IsToken( $c ) )
+                if( $this->_IsToken( $c, ($pos+$i+1<$len?$text[$pos+$i+1]:null) ) )
 					break;
 				if( ($c=='-') && ($pos+$i+1<$len) && ($text[$pos+$i+1]==">") )
 						break;
