@@ -156,7 +156,6 @@ abstract class PageGWTIO extends PageImpl
 				throw $e;
 			}
 			
-			//$this->QPath->AbortTransaction();
 			$this->QPath->CloseTransaction( $transactionId );
 			
 			$result[] = array( HLib("ServerState")->GetLevel(), HLib("ServerState")->GetMessage(), $hangOutCode, $res );
