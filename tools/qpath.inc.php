@@ -3,11 +3,18 @@
 function QPathQueryFieldList( $table, $fields )
 {
 	$res = array();
-
-	foreach( $fields as $field )
-		$res[] = "F[$table.$field as `$table.$field`]";
-
-	return implode( " ", $res ) . " ";
+	
+	if( is_array( $fields ) )
+	{
+		foreach( $fields as $field )
+			$res[] = "F[$table.$field as `$table.$field`]";
+		
+		return implode( " ", $res ) . " ";
+	}
+	else
+	{
+		return "F[$table.$fields as `$table.$fields`]";
+	}
 }
 
 function QPathQueryFieldListEx( $tableAndFields )
