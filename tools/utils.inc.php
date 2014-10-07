@@ -1,5 +1,33 @@
 <?php
 
+/** This function converts a String representation of a decimal number
+ * comming from a database through PDO.
+ * The output value is an integer which is 100 times the value received
+ * as the input.
+ * 
+ * @param unknown $value
+ * @return number
+ */
+function convCents( $value )
+{
+	// ensures that there is a '.' before the 2 last decimals
+	if( strpos( $value, "." ) != (strlen($value)-3) )
+	{
+		echo "Not good input for convCents ! " + $value;
+		die();
+	}
+	
+	$value = str_replace( ".", "", $value );
+	
+	$res = (int) (1 * $value);
+	
+// 	$gmp = gmp_init( $value, 10 );
+// 	$cents = gmp_mul( $gmp, "100" );
+// 	$res = gmp_intval( $cents );
+
+	return $res;
+}
+
 function ensureDirectoryExists( $directory )
 {
 	$parts = explode( "/", $directory );
