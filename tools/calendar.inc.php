@@ -88,11 +88,7 @@ function date_get_day( $date )
 	$z = ($m < 3) ? $y - 1 : $y;
 	$r = ($m < 3) ? 0 : 2;
 	
-	// return ( (23*$m)/9 + $d + 4 + $y + $z/4 - $z/100 + $z/400 - $r ) % 7;
-	
 	return (intdiv( 23 * $m, 9 ) + $d + 4 + $y + intdiv( $z, 4 ) - intdiv( $z, 100 ) + intdiv( $z, 400 ) - $r) % 7;
-	
-	return (23 * (int) (floor( $m / 9 )) + $d + 4 + $y + (int) (floor( $z / 4 )) - (int) (floor( $z / 100 )) + (int) (floor( $z / 400 )) - $r) % 7;
 }
 
 function now()
@@ -767,6 +763,24 @@ class CalendarPeriod
 		for( $i = 0; $i < 7; $i++ )
 			$this->days[$i] = 0;
 		$this->days[$day] = 1;
+	}
+	
+	/** Get period's days as a list */
+	public function GetDays()
+	{
+		// unresolved periods ?
+		//$this->Resolve(TIME_BEGIN, TIME_END);
+		
+		$res = array();
+		
+		foreach( $this->periods as $period )
+		{
+			// TODO
+			for( $date = $period[0]; $date<=$period[1]; $date = date_add_day($date, 1) )
+				$res[] = $date;
+		}
+		
+		return $res;
 	}
 	
 	// print string

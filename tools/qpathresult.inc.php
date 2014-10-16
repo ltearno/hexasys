@@ -249,9 +249,11 @@ class QPathResult implements IteratorAggregate
 		return $array;
 	}
 	
-	// return the value of a field in a row.
-	// $row is the index of the row
-	// $field is the name of the required field
+	/**
+	 * Retreives the value of a field in a row.
+	 * $row is the index of the row
+	 * $field is the name of the required field
+	 */
 	function GetVal( $row, $field )
 	{
 		if( $this->useInfo != null )

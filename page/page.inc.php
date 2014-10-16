@@ -15,10 +15,11 @@ interface Page
 	function Execute( $params, $posts );
 }
 
+
+
 abstract class PageImpl implements Page
 {
-	// QPath object
-    /* @var $QPath QPath */
+	/* @var QPath $QPath */
 	var $QPath = null;
 
     /* @var $DB Database */
