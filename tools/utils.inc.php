@@ -28,6 +28,19 @@ function convCents( $value )
 	return $res;
 }
 
+/**
+ * Converts a cents value back into a decimal representation.
+ * <p>Still, the function returns a String so that precision
+ * is not lost...
+ * 
+ * @param int $value A value, in cents
+ * @return String A String representation of the value in decimal format
+ */
+function convCentsBack( $value )
+{
+	return substr_replace( $value, ".", strlen( $value ) - 2, 0 );
+}
+
 function ensureDirectoryExists( $directory )
 {
 	$parts = explode( "/", $directory );
