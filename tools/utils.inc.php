@@ -10,22 +10,7 @@
  */
 function convCents( $value )
 {
-	// ensures that there is a '.' before the 2 last decimals
-	if( strpos( $value, "." ) != (strlen($value)-3) )
-	{
-		echo "Not good input for convCents ! " + $value;
-		die();
-	}
-	
-	$value = str_replace( ".", "", $value );
-	
-	$res = (int) (1 * $value);
-	
-// 	$gmp = gmp_init( $value, 10 );
-// 	$cents = gmp_mul( $gmp, "100" );
-// 	$res = gmp_intval( $cents );
-
-	return $res;
+	return bcmul( bcmul( $value, "100", 2 ), 1, 0 );
 }
 
 /**
@@ -38,7 +23,7 @@ function convCents( $value )
  */
 function convCentsBack( $value )
 {
-	return substr_replace( $value, ".", strlen( $value ) - 2, 0 );
+	return bcdiv( $value, "100", 2 );
 }
 
 function ensureDirectoryExists( $directory )
