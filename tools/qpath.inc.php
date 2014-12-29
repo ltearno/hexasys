@@ -6,7 +6,7 @@ function QPathQueryFieldList( $table, $fields )
 	
 	if( is_array( $fields ) )
 	{
-		foreach( $fields as $field )
+		foreach( array_reverse($fields) as $field )
 			$res[] = "F[$table.$field as `$table.$field`]";
 		
 		return implode( " ", $res ) . " ";
@@ -21,9 +21,9 @@ function QPathQueryFieldListEx( $tableAndFields )
 {
 	$res = array();
 	
-	foreach( $tableAndFields as $table => $fields )
+	foreach( array_reverse($tableAndFields) as $table => $fields )
 	{
-		foreach( $fields as $field )
+		foreach( array_reverse($fields) as $field )
 			$res[] = "F[$table.$field as `$table.$field`]";
 	}
 
