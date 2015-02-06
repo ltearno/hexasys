@@ -22,6 +22,12 @@ header( 'Content-type: text/html; charset=UTF-8' );
 session_start();
 
 /*
+ * Defintion of the BCMath default precision. 
+ */
+
+bcscale( 2 );
+
+/*
  * An HexaComponent can be initialized to receive the database and qpath global instances
  */
 
