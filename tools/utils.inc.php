@@ -1,23 +1,8 @@
 <?php
 
-function bcadd( $a, $b )
+if( ! function_exists('bcadd') )
 {
-	return round( ($a * 100 + $b * 100) / 100, 2 );
-}
-
-function bcsub( $a, $b )
-{
-	return round( ($a * 100 - $b * 100) / 100, 2 );
-}
-
-function bcmul( $a, $b )
-{
-	return round( $a * $b, 2 );
-}
-
-function bccomp( $a, $b )
-{
-	return $a > $b ? 1 : ($a==$b ? 0 : -1);
+	include_once 'bcmath.inc.php';
 }
 
 
