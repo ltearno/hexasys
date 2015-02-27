@@ -25,7 +25,8 @@ session_start();
  * Defintion of the BCMath default precision. 
  */
 
-bcscale( 2 );
+if( function_exists('bcscale') )
+	bcscale( 2 );
 
 /*
  * An HexaComponent can be initialized to receive the database and qpath global instances
