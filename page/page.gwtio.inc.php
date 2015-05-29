@@ -4,6 +4,7 @@ abstract class PageGWTIO extends PageImpl
 {
 	abstract function GetPermissionManager();
 	abstract function GetServiceInstance( $serviceName );
+	abstract function LogMethod( $methodName );
 	
 	var $serviceInstances = null;
 	
@@ -41,7 +42,8 @@ abstract class PageGWTIO extends PageImpl
 
 		$logger = new Logger();
 		$logger->Init( 'gwt-interop-direct.txt', Logger::LOG_MSG );
-		$logger->Log( Logger::LOG_MSG, 'QUERY URL: ' . $_SERVER['QUERY_STRING'] );
+
+		//$logger->Log( Logger::LOG_MSG, 'QUERY URL: ' . $_SERVER['QUERY_STRING'] );
 
 		$result = array();
 		
@@ -114,12 +116,14 @@ abstract class PageGWTIO extends PageImpl
 				{
 					$loggedUserId = HLib("Security")->GetLoggedUserId();
 					
-					// start a time measure
 					$m = HLib("Measure")->Start();
 					$res = call_user_func_array( array($serviceInstance,$method), $parameters );
 					$ms = HLib("Measure")->End( $m );
 					
-					$logger->Log( Logger::LOG_MSG, "(".round($ms,2)." ms) user:$loggedUserId " . $method . '( ' . array2string( $parameters ) . ' )' );
+					$logMethod = $this->logMethod( $method );
+					
+					if( $logMethod )
+						$logger->Log( Logger::LOG_MSG, "(".round($ms,2)." ms) user:$loggedUserId " . $method . '( ' . array2string( $parameters ) . ' )' );
 					
 					if( $ms > 2000 )
 					{
