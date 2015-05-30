@@ -381,6 +381,11 @@ class QPath
 		return $insertedId;
 	}
 	
+	function Log( $message )
+	{
+		$this->logger->Log( Logger::LOG_MSG, "user:$loggedUserId MESSAGE : " . $message );
+	}
+	
 	function Delete( $table, $cond )
 	{
 		$loggedUserId = HLib("Security")->GetLoggedUserId();
