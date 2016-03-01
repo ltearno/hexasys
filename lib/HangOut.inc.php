@@ -39,7 +39,7 @@ class HangOut extends HexaComponentImpl
 		throw new HangOutException( $name, $type, $title, $description );
 	}
 	
-	public function ProcessException( HangOutException $e, $service, $method, $parameters )
+	public function ProcessException( HangOutException $e, $method, $parameters )
 	{
 		// store service, method and parameters for future calls
 		$hangouts = HLibStoredVariables()->Read( HANG_OUTS, "hang_outs" );

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * This class should be removed, together with all QPex related things.
+ *
+ * This was an attempt but turned out to be not so good...
+ */
 $qwalk_history = array();
 class QWalk
 {
@@ -90,22 +95,9 @@ class QWalk
         return $this->get( $name );
     }
 
-    public function get( $field, $externalTable=null, $externalIdField = null )
+    public function get( $field )
     {
         return $this->rawRecord[$field];
-        /*
-        if( substr( $field, -4 ) == "_ids" )
-        {
-            $value = $this->rawRecord[$field];
-            if( strlen( $value ) == 0 )
-                return array();
-            return explode( ',', $value );
-        }
-        else
-        {
-            return $this->rawRecord[$field];
-        }
-        */
     }
 
     public function getFather( $field, $externalTable=null, $externalIdField = null )

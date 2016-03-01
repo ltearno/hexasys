@@ -11,7 +11,7 @@ if( ! function_exists('bcadd') )
  * The output value is an integer which is 100 times the value received
  * as the input.
  * 
- * @param unknown $value
+ * @param string $value
  * @return number
  */
 function convCents( $value )
@@ -239,6 +239,8 @@ function CreateThumbnail( $type, $srcFile, $destFile, $width, $height )
 		$srcImg = imagecreatefromjpeg( $srcFile );
 	else if( $type == 'png' )
 		$srcImg = imagecreatefrompng( $srcFile );
+	else
+		return null;
 
 	$srcImgW = imageSX( $srcImg );
 	$srcImgH = imageSY( $srcImg );

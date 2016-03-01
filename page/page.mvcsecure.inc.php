@@ -2,6 +2,7 @@
 
 abstract class PageMVCSecure extends PageMVC
 {
+	/** @var  PageState */
 	var $ctx;
 
 	function Execute( $params, $posts )
@@ -16,7 +17,7 @@ abstract class PageMVCSecure extends PageMVC
 		// user wants to log out
 		if( $this->ctx->getItem( "logout" ) )
 		{
-			HLib("Security")->LogOut();
+			HLibSecurity()->LogOut();
 				
 			$this->ctx->updateState( array( "logout" => null ) );
 				
@@ -25,13 +26,13 @@ abstract class PageMVCSecure extends PageMVC
 			$this->ctx->updateState( array( "login"=>null, "pass"=>null, "pass_md5"=>null ) );
 		}
 
-		$loggedUser = HLib("Security")->GetLoggedUser();
+		$loggedUser = HLibSecurity()->GetLoggedUser();
 		if( $loggedUser == null )
 		{
 			// we should find a way to log the user in
 				
 			// get an app provided logging facility, if any
-			$iUserPasswordLogin = HLib("Security")->GetUserPasswordLogin();
+			$iUserPasswordLogin = HLibSecurity()->GetUserPasswordLogin();
 			if( $iUserPasswordLogin != null )
 			{
 				// test if a login information has been provided
@@ -43,7 +44,7 @@ abstract class PageMVCSecure extends PageMVC
 				{
 					$iUserPasswordLogin->TryLoginUser( $login, $passwordMd5 );
 						
-					$loggedUser = HLib("Security")->GetLoggedUser();
+					$loggedUser = HLibSecurity()->GetLoggedUser();
 					if( $loggedUser == null )
 					{
 						$message .= "Wrong login information provided, please try to log in again";
@@ -84,7 +85,7 @@ abstract class PageMVCSecure extends PageMVC
 		}
 
 		// refresh the logged user data
-		$loggedUser = HLib("Security")->GetLoggedUser();
+		$loggedUser = HLibSecurity()->GetLoggedUser();
 
 		// should not happen !
 		if( $loggedUser == null )
@@ -101,7 +102,7 @@ abstract class PageMVCSecure extends PageMVC
 		}
 
 		// if the user has not the right permission, leave
-		if( ! HLib("Security")->TestPermission( 'AdminPages' ) )
+		if( ! HLibSecurity()->TestPermission( 'AdminPages' ) )
 		{
 			$this->generateHeaderPart();
 				

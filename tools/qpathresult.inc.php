@@ -1,5 +1,11 @@
 <?php
 
+interface  QPathResultSerializer
+{
+	/** @return string[] */
+	function GetFieldOrder();
+}
+
 class QPathResultRowArrayAccess implements ArrayAccess
 {
 	var $qpathresultiterator = null;
@@ -143,7 +149,8 @@ class QPathResult implements IteratorAggregate
 	var $rows = null;
 	
 	var $indexes = null;
-	
+
+	/** @var QPathResultUseInformation */
 	var $useInfo = null;
 	
 	public function getIterator()
@@ -214,7 +221,7 @@ class QPathResult implements IteratorAggregate
 		return $array;
 	}
 
-    function GetSerializedArray( $serializer )
+    function GetSerializedArray( QPathResultSerializer $serializer )
     {
     	if( $this->useInfo != null )
 			$this->useInfo->useAllFields();
@@ -251,8 +258,8 @@ class QPathResult implements IteratorAggregate
 	
 	/**
 	 * Retreives the value of a field in a row.
-	 * $row is the index of the row
-	 * $field is the name of the required field
+	 * @param $row int the index of the row
+	 * @param $field string the name of the required field
 	 */
 	function GetVal( $row, $field )
 	{

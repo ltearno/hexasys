@@ -141,6 +141,12 @@ function HLibServerState() { return HLib("ServerState"); }
 function HLibStoredVariables() { return HLib("StoredVariables"); }
 /** @return HangOut */
 function HLibHangout() { return HLib("HangOut"); }
+/** @return LocaleInfo */
+function HLibLocaleInfo() { return HLib("LocaleInfo"); }
+/** @return BkgndJobs */
+function HLibBkgndJobs() { return HLib("BkgndJobs"); }
+/** @return Installation */
+function HLibInstallation() { return HLib("Installation"); }
 /*
  * Page parent object from which inherits every page used in this framework
  */

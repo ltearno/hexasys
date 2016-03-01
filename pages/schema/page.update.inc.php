@@ -21,7 +21,7 @@ class page_update extends PageMVCSecure
 		
 		// get the sql statements to be executed
 		$noDelete = isset( $params['delete'] ) && $params['delete'] == "no";
-		$sqls = HLib("Installation")->GetSqlForUpdateDb( $currentDbDesc, $targetDbDesc, $this->DB, ! $noDelete );
+		$sqls = HLibInstallation()->GetSqlForUpdateDb( $currentDbDesc, $targetDbDesc, $this->DB, ! $noDelete );
 		echo "<br/>";
 		
 		if( count( $sqls ) == 0 )

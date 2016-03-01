@@ -174,8 +174,6 @@ class QPex
 	
 	public function ONE()
 	{
-		global $QPexLogger;
-		
 		$sql = $this->SQL();
 		
 		$this->db->Query( $sql );
@@ -247,6 +245,11 @@ class QPex
 		{
 			$leftField = $left_table . '.id';
 			$rightField = $right_table . '.' . Singularize($left_table).'_id';
+		}
+		else
+		{
+			$leftField = "UNKNOWN FIELD (ERROR)";
+			$rightField = "UNKNOWN FIELD (ERROR)";
 		}
 		
 		// custom fields

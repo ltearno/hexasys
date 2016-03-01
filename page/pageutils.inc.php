@@ -145,7 +145,7 @@ class FormBuilder
 					break;
 			}
 		}
-		$res .= "<input type='submit' value='submit'></input>";
+		$res .= "<input type='submit' value='submit'/>";
 		$res .= "</form>";
 
 		return $res;

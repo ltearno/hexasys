@@ -62,6 +62,7 @@ include_once( $pageFile );
 
 // load the page code
 $classToCall = 'page_' . $page;
+/** @var Page $pageObject */
 $pageObject = new $classToCall();
 $pageObject->Init( $GLOBAL_QPATH, $GLOBAL_DATABASE, $location, $page == $container ? null : $page );
 

@@ -7,7 +7,7 @@ class page_list extends PageMVCSecure
 		if( isset( $posts["delete_job"] ) )
 		{
 			$jobId = $posts["delete_job"];
-			$res = HLib("BkgndJobs")->Delete( $jobId );
+			HLibBkgndJobs()->Delete( $jobId );
 			
 			echo "Job $jobId has been deleted<br/><br/><br/>";
 		}
@@ -20,9 +20,9 @@ class page_list extends PageMVCSecure
 
 class FieldJobDescription
 {
-	function RowValue( $qPathResult, $i )
+	function RowValue( QPathResult $qPathResult, $i )
 	{
-		return HLib("BkgndJobs")->GetJobDescription( $qPathResult->GetVal( $i, "bkgnd_jobs.id" ) );
+		return HLibBkgndJobs()->GetJobDescription( $qPathResult->GetVal( $i, "bkgnd_jobs.id" ) );
 	}
 }
 
@@ -35,7 +35,7 @@ class FieldJobDelete
 		$this->page = $page;
 	}
 	
-	function RowValue( $qPathResult, $i )
+	function RowValue( QPathResult $qPathResult, $i )
 	{
 		return getButton( $this->page, "Delete", array( "delete_job"=>$qPathResult->GetVal( $i, "bkgnd_jobs.id" ) ), null );
 	}

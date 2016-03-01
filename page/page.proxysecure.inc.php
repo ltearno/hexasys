@@ -6,9 +6,9 @@ abstract class PageProxySecure extends PageImpl
 
 	public function Execute( $params, $posts )
 	{
-		HLib("Security")->AnalyseLoggedUser();
+		HLibSecurity()->AnalyseLoggedUser();
 
-		$loggedUser = HLib("Security")->GetLoggedUser();
+		$loggedUser = HLibSecurity()->GetLoggedUser();
 		if( $loggedUser == null )
 		{
 			echo "Not logged in<br/>";

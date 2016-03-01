@@ -16,8 +16,6 @@ abstract class PageGWTIO extends PageImpl
 		if( ! isset( $this->serviceInstances[$service] ) )
 		{
 			$svcInfo = $this->GetServiceInstance( $service );
-			$serviceInstance = $svcInfo["instance"];
-			$serviceMethods = $svcInfo["methods"];
 			
 			$this->serviceInstances[$service] = $svcInfo;
 		}
@@ -38,7 +36,7 @@ abstract class PageGWTIO extends PageImpl
 		header( "Cache-Control: no-cache" );
 		
 		if( isset( $params['locale'] ) )
-			HLib("LocaleInfo")->SetLocale( $params['locale'] );
+			HLibLocaleInfo()->SetLocale( $params['locale'] );
 
 		$logger = new Logger();
 		$logger->Init( 'gwt-interop-direct.txt', Logger::LOG_MSG );
@@ -85,7 +83,7 @@ abstract class PageGWTIO extends PageImpl
 		// Process each call
 		foreach( $calls as $call )
 		{
-			HLib("ServerState")->Reset();
+			HLibServerState()->Reset();
 			
 			$method = $call[0];
 			$parameters = array_values( $call[1] );
@@ -100,9 +98,7 @@ abstract class PageGWTIO extends PageImpl
 			
 			$hangOutCode = null;
 			$res = null;
-			HLib("HangOut")->SetValue( null );
-			
-			$debug = HLib("LocaleInfo")->GetLocale() == "debug";
+			HLibHangout()->SetValue( null );
 			
 			$transactionId = $this->QPath->StartTransaction();
 			
@@ -110,15 +106,15 @@ abstract class PageGWTIO extends PageImpl
 			{
 				$doCall = true;
 				if( $method == "_hang_out_reply_" )
-					$doCall = HLib("HangOut")->ProcessReply( $method, $parameters );
+					$doCall = HLibHangout()->ProcessReply( $method, $parameters );
 				
 				if( $doCall )
 				{
-					$loggedUserId = HLib("Security")->GetLoggedUserId();
+					$loggedUserId = HLibSecurity()->GetLoggedUserId();
 					
-					$m = HLib("Measure")->Start();
+					$m = HLibMeasure()->Start();
 					$res = call_user_func_array( array($serviceInstance,$method), $parameters );
-					$ms = HLib("Measure")->End( $m );
+					$ms = HLibMeasure()->End( $m );
 					
 					$logMethod = $this->logMethod( $method );
 					
@@ -137,7 +133,7 @@ abstract class PageGWTIO extends PageImpl
 			catch( SecurityException $e )
 			{
 				$logger->Log( Logger::LOG_ERR, "RAISES SECURITY EXCEPTION" );
-				HLib("Security")->ProcessException( $e );
+				HLibSecurity()->ProcessException( $e );
 				
 				$res = null;
 				
@@ -146,7 +142,7 @@ abstract class PageGWTIO extends PageImpl
 			catch( HangOutException $e )
 			{
 				$logger->Log( Logger::LOG_MSG, "RAISES HANGOUT EXCEPTION" );
-				$hangOutCode = HLib("HangOut")->ProcessException( $e, $service, $method, $parameters );
+				$hangOutCode = HLibHangout()->ProcessException( $e, $method, $parameters );
 				
 				$this->QPath->AbortTransaction();
 			}
@@ -162,7 +158,7 @@ abstract class PageGWTIO extends PageImpl
 			
 			$this->QPath->CloseTransaction( $transactionId );
 			
-			$result[] = array( HLib("ServerState")->GetLevel(), HLib("ServerState")->GetMessage(), $hangOutCode, $res );
+			$result[] = array( HLibServerState()->GetLevel(), HLibServerState()->GetMessage(), $hangOutCode, $res );
 		}
 		
 		$json = json_encode( $result );

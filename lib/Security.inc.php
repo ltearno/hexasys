@@ -80,7 +80,10 @@ class Security extends HexaComponentImpl
 	{
 		$this->iUserPasswordLogin = $iUserPasswordLogin;
 	}
-	
+
+	/**
+	 * @return IUserPasswordLogin
+	 */
 	public function GetUserPasswordLogin()
 	{
 		return $this->iUserPasswordLogin;
