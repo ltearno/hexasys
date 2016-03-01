@@ -384,6 +384,7 @@ class QPath
 	function Log( $message )
 	{
         $loggedUserId = HLib("Security")->GetLoggedUserId();
+
 		$this->logger->Log( Logger::LOG_MSG, "user:$loggedUserId MESSAGE : " . $message );
 	}
 
@@ -422,7 +423,6 @@ class QPath
 
 		$this->logger->Log( Logger::LOG_MSG, "user:$loggedUserId UPDATE : $sql" );
 
-		//echo $sql . "<br/>";
 		$this->db->Query( $sql );
 	}
 
