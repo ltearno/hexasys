@@ -2,9 +2,16 @@
 
 class DBOrderedList
 {
+	/** @var QPath */
 	var $QPath;
+
+	/** @var string */
 	var $table;
+
+	/** @var string */
 	var $groupField;
+
+	/** @var string */
 	var $positionField;
 
 	public function __construct( $qpath, $table, $groupField, $positionField )
@@ -18,7 +25,7 @@ class DBOrderedList
 	public function getUpdateFunction()
 	{
 		$groupField = $this->groupField;
-		return function( $qpath, $table, $idField, $id, $fieldName, $oldValue, $newValue )  use( $groupField )
+		return function( QPath $qpath, $table, $idField, $id, $fieldName, $oldValue, $newValue )  use( $groupField )
 		{
 			if( $newValue < 0 )
 				return;

@@ -28,6 +28,10 @@ interface IBkgndJobMng
 
 class BkgndJobs extends HexaComponentImpl
 {
+	/**
+	 * @param $jobAddress string
+	 * @return IBkgndJobMng
+	 */
 	private function getJobMngInstance( $jobAddress )
 	{
 		$classContainer = APP_DIR . "jobmngs/job." . $jobAddress . ".inc.php";
@@ -51,7 +55,7 @@ class BkgndJobs extends HexaComponentImpl
 		$jobAddress = $job["bkgnd_jobs.job_mng_address"];
 		$jobMng = $this->getJobMngInstance( $jobAddress );
 		
-		$ctxVar = HLib("StoredVariables")->Read( SYS_JOBS, $job["bkgnd_jobs.ctx_variable_name"] );
+		$ctxVar = HLibStoredVariables()->Read( SYS_JOBS, $job["bkgnd_jobs.ctx_variable_name"] );
 		
 		return $jobMng->GetDescription( $ctxVar );
 	}
@@ -67,7 +71,7 @@ class BkgndJobs extends HexaComponentImpl
 		$ctxVarName = "job_var_" . uniqid();
 		$jobId = $this->QPath->Insert( "bkgnd_jobs", array( "job_mng_address"=>$jobAddress, "ctx_variable_name"=>$ctxVarName ) );
 		
-		HLib("StoredVariables")->Store( SYS_JOBS, $ctxVarName, $jobCtx );
+		HLibStoredVariables()->Store( SYS_JOBS, $ctxVarName, $jobCtx );
 		
 		return $jobId;
 	}
@@ -82,40 +86,44 @@ class BkgndJobs extends HexaComponentImpl
 		if( $jobMng == null )
 			return -2;
 		
-		$ctxVar = HLib("StoredVariables")->Read( SYS_JOBS, $job['bkgnd_jobs.ctx_variable_name'] );
+		$ctxVar = HLibStoredVariables()->Read( SYS_JOBS, $job['bkgnd_jobs.ctx_variable_name'] );
 		
 		echo "BkgndJob context variable dump:<br/>";
 		Dump( $ctxVar );
 		
 		$finished = false;
-		$m = HLib("Measure")->Start();
+		$m = HLibMeasure()->Start();
 		$jobMng->Step( $ctxVar, $finished );
-		$ms = HLib("Measure")->End( $m );
+		$ms = HLibMeasure()->End( $m );
 		
-		HLib("StoredVariables")->Store( SYS_JOBS, $job['bkgnd_jobs.ctx_variable_name'], $ctxVar );
+		HLibStoredVariables()->Store( SYS_JOBS, $job['bkgnd_jobs.ctx_variable_name'], $ctxVar );
 		
 		$this->QPath->Update( "bkgnd_jobs", "id=$jobId", array( "exec_time" => $ms + $job['bkgnd_jobs.exec_time'], "times_stepped" => 1 + $job['bkgnd_jobs.times_stepped'], "finished"=>($finished?1:0) ) );
+
+		return 0;
 	}
 	
 	public function Delete( $jobId )
 	{
 		$job = $this->QPath->QueryOne( "bkgnd_jobs [id=$jobId]" );
 		if( $job == null )
-			return; // maybe already done, anyway : nothing to be done !
+			return 0; // maybe already done, anyway : nothing to do !
 		
 		$jobMng = $this->getJobMngInstance( $job['bkgnd_jobs.job_mng_address'] );
 		if( $jobMng == null )
 			return -2;
 		
-		$ctxVar = HLib("StoredVariables")->Read( SYS_JOBS, $job['bkgnd_jobs.ctx_variable_name'] );
+		$ctxVar = HLibStoredVariables()->Read( SYS_JOBS, $job['bkgnd_jobs.ctx_variable_name'] );
 		
 		$jobMng->OnDelete( $ctxVar );
 		
 		// delete the Stored ctx variable
-		HLib("StoredVariables")->Remove( SYS_JOBS, $job['bkgnd_jobs.ctx_variable_name'] );
+		HLibStoredVariables()->Remove( SYS_JOBS, $job['bkgnd_jobs.ctx_variable_name'] );
 		
 		// remove the database entry
 		$this->QPath->Delete( "bkgnd_jobs", "id=$jobId" );
+
+		return 0;
 	}
 	
 	// Chooses a non-finished job and step it

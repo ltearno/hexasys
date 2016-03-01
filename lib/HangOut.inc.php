@@ -42,12 +42,12 @@ class HangOut extends HexaComponentImpl
 	public function ProcessException( HangOutException $e, $service, $method, $parameters )
 	{
 		// store service, method and parameters for future calls
-		$hangouts = HLib("StoredVariables")->Read( HANG_OUTS, "hang_outs" );
+		$hangouts = HLibStoredVariables()->Read( HANG_OUTS, "hang_outs" );
 		if( is_null( $hangouts ) )
 			$hangouts = array();
 		$hangoutId = count( $hangouts );
 		$hangouts["HO_".$hangoutId] = array( "method"=>$method, "parameters"=>$parameters );
-		HLib("StoredVariables")->Store( HANG_OUTS, "hang_outs", $hangouts );
+		HLibStoredVariables()->Store( HANG_OUTS, "hang_outs", $hangouts );
 		
 		// return the data that will be passed back to the client as the HangOut data
 		$res = array( $hangoutId, array($e->name,$e->type,$e->title,$e->description), $this->replyData );
@@ -57,21 +57,21 @@ class HangOut extends HexaComponentImpl
 	
 	public function ProcessReply( &$method, &$parameters )
 	{
-		$hangouts = HLib("StoredVariables")->Read( HANG_OUTS, "hang_outs" );
+		$hangouts = HLibStoredVariables()->Read( HANG_OUTS, "hang_outs" );
 		
 		$hang_out = isset( $hangouts["HO_".$parameters[0]] ) ? $hangouts["HO_".$parameters[0]] : null;
 		unset( $hangouts["HO_".$parameters[0]] );
-		HLib("StoredVariables")->Store( HANG_OUTS, "hang_outs", $hangouts );
+		HLibStoredVariables()->Store( HANG_OUTS, "hang_outs", $hangouts );
 		
 		if( $hang_out == null )
 		{
-			HLib("ServerState")->AddMessage( "Hang out call reply cannot be processed because of hang_out ".$parameters[0]." record not found" );
+			HLibServerState()->AddMessage( "Hang out call reply cannot be processed because of hang_out ".$parameters[0]." record not found" );
 			
 			return false;
 		}
 		else
 		{
-			HLib("HangOut")->SetValue( $parameters[1] );
+			HLibHangout()->SetValue( $parameters[1] );
 			
 			$method = $hang_out['method'];
 			$parameters = ( $hang_out['parameters'] );

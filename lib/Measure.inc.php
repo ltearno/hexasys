@@ -2,7 +2,7 @@
 
 class Measure extends HexaComponentImpl
 {
-	// construct
+	/** @var Logger $logger */
 	var $logger = null;
 	
 	private function checkLogger()

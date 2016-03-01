@@ -193,7 +193,7 @@ class Installation extends HexaComponentImpl
 			
 	}
 	
-	private function CheckReferences( $tableName, $fieldName, $curField, $tgtField, &$sqls, $currentDB )
+	private function CheckReferences( $tableName, $fieldName, $curField, $tgtField, &$sqls, Database $currentDB )
 	{
 		$curRefs = $curField==null ? array() : (isset($curField["references"]) ? $curField["references"] : array());
 		$tgtRefs = isset($tgtField["references"]) ? $tgtField["references"] : array();
@@ -232,7 +232,7 @@ class Installation extends HexaComponentImpl
 	}
 	
 	/* SQL formatting helpers */
-	private function GetColumnSql( $fieldName, $fieldDesc, $currentDB )
+	private function GetColumnSql( $fieldName, $fieldDesc, Database $currentDB )
 	{
 		$default = "";
 		if( ! is_null( $fieldDesc['default'] ) )

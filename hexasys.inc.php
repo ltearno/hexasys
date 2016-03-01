@@ -129,20 +129,20 @@ function HLibInclude( $libraryName )
 	include_once( "lib/" . $libraryName . '.inc.php' );
 }
 
-/** @return Security */
-function HLibSecurity()
-{
-	return HLib("Security");
-}
+// Typed wrappers to HLib() calls
 
+/** @return Security */
+function HLibSecurity() { return HLib("Security"); }
 /** @return Measure */
-function HLibMeasure()
-{
-	return HLib("Measure");
-}
-	
+function HLibMeasure() { return HLib("Measure"); }
+/** @return ServerState */
+function HLibServerState() { return HLib("ServerState"); }
+/** @return StoredVariables */
+function HLibStoredVariables() { return HLib("StoredVariables"); }
+/** @return HangOut */
+function HLibHangout() { return HLib("HangOut"); }
 /*
- * Page parent object from which heritate every page used in this framework
+ * Page parent object from which inherits every page used in this framework
  */
 
 include_once ('page/page.inc.php');

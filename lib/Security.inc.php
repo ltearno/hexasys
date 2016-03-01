@@ -35,10 +35,12 @@ class SecurityException extends Exception
 
 class Security extends HexaComponentImpl
 {
+	/** @var IPermissionManager */
 	var $mng = null;
 	
 	var $iUserPasswordLogin = null;
-	
+
+	/** @var IUserMngt */
 	var $iUserMngt = null;
 	
 	public function SetUserMngt( IUserMngt $iUserMngt )
@@ -71,9 +73,7 @@ class Security extends HexaComponentImpl
 	public function LogOut()
 	{
 		if( $this->iUserMngt != null )
-			return $this->iUserMngt->LogOut();
-		
-		return;
+			$this->iUserMngt->LogOut();
 	}
 	
 	public function SetUserPasswordLogin( IUserPasswordLogin $iUserPasswordLogin )
@@ -107,8 +107,8 @@ class Security extends HexaComponentImpl
 	
 	public function ProcessException( SecurityException $e )
 	{
-		HLib("ServerState")->SetLevel( SERVERSTATE_LEVEL_ERROR );
-		HLib("ServerState")->AddMessage( "Security exception : " . $e->GetMessage() );
+		HLibServerState()->SetLevel( SERVERSTATE_LEVEL_ERROR );
+		HLibServerState()->AddMessage( "Security exception : " . $e->GetMessage() );
 	}
 	
 	public function GetPermissionList()
