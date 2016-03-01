@@ -156,7 +156,10 @@ include( 'qpathresult.inc.php' );
 
 class QPath
 {
+	/** @var Database  */
 	var $db = null;
+
+	/** @var Logger */
 	var $logger = null;
 
 	var $alwaysLog = false;
@@ -183,7 +186,7 @@ class QPath
 		return $obj;
 	}
 
-    function NewQWalk( $table, $id, $idField = 'id', $rawRecord = null )
+    function NewQWalk( $table, $id, $idField = 'id')
     {
         $w = QWalk::newQWalk( $this->db, $table, $idField, $id );
 
@@ -211,11 +214,14 @@ class QPath
         return $res;
 	}
 
-    /* @return QPathResult */
+    /**
+	 * @return QPathResult
+	 * @param $expression string
+	 */
 	function QueryEx( $expression )
 	{
 		// start a time measure
-		$m = HLib("Measure")->Start();
+		$m = HLibMeasure()->Start();
 
 		$sql = $this->Parse( $expression );
 		$this->db->Query( $sql );
@@ -224,7 +230,7 @@ class QPath
 		$res = new QPathResult();
 		$res->Set( array_flip( $this->db->GetFieldsNames() ), $this->db->LoadAllResultArray() );
 
-		$ms = HLib("Measure")->End( $m );
+		$ms = HLibMeasure()->End( $m );
 		if( $ms > 2000 )
 		{
 			$log = new Logger();
@@ -266,7 +272,10 @@ class QPath
 		return $res[0];
 	}
 
-	/* @return QPathResult */
+	/** @return QPathResult
+	 * @param $expression string
+	 * @param $limit string
+	 */
 	function QueryExLimit( $expression, $limit )
 	{
 		$sql = $this->Parse( $expression );
@@ -282,7 +291,9 @@ class QPath
 		return $res;
 	}
 
-	/* @return QPathResult */
+	/* @return QPathResult
+	 * @param $expression string
+	 * @param $where string */
 	function QueryExWhere( $expression, $where )
 	{
 		$sql = $this->Parse( $expression, $where );
@@ -344,7 +355,12 @@ class QPath
 		return $res[0];
 	}
 
-	function Insert( $table, $fields = null )
+	/**
+	 * @param $table
+	 * @param null $fields
+	 * @return int
+     */
+	function Insert($table, $fields = null )
 	{
 		// protect from bad character and eventually code injection
 		if( $fields != null )
@@ -374,7 +390,7 @@ class QPath
 
 		$insertedId = $this->db->InsertedId();
 
-		$loggedUserId = HLib("Security")->GetLoggedUserId();
+		$loggedUserId = HLibSecurity()->GetLoggedUserId();
 
 		$this->logger->Log( Logger::LOG_MSG, "user:$loggedUserId INSERT ($insertedId) : $sql" );
 
@@ -383,14 +399,14 @@ class QPath
 
 	function Log( $message )
 	{
-        $loggedUserId = HLib("Security")->GetLoggedUserId();
+        $loggedUserId = HLibSecurity()->GetLoggedUserId();
 
 		$this->logger->Log( Logger::LOG_MSG, "user:$loggedUserId MESSAGE : " . $message );
 	}
 
 	function Delete( $table, $cond )
 	{
-		$loggedUserId = HLib("Security")->GetLoggedUserId();
+		$loggedUserId = HLibSecurity()->GetLoggedUserId();
 
 		$this->logger->Log( Logger::LOG_MSG, "user:$loggedUserId DELETE : " . $table . ' CONDITION : ' . $cond );
 
@@ -419,11 +435,13 @@ class QPath
 		}
 		$sql = "UPDATE $table SET " . implode(", ",$a) . " WHERE $cond";
 
-		$loggedUserId = HLib("Security")->GetLoggedUserId();
+		$loggedUserId = HLibSecurity()->GetLoggedUserId();
 
 		$this->logger->Log( Logger::LOG_MSG, "user:$loggedUserId UPDATE : $sql" );
 
 		$this->db->Query( $sql );
+
+		return 1;
 	}
 
 	function UpdateRaw( $table, $cond, $data )
@@ -433,7 +451,7 @@ class QPath
 			$a[] = "`" . $name . "`" . "=" . $value;
 		$sql = "UPDATE " . $table . " SET " . implode(", ",$a) . " WHERE " . $cond;
 
-		$loggedUserId = HLib("Security")->GetLoggedUserId();
+		$loggedUserId = HLibSecurity()->GetLoggedUserId();
 
 		$this->logger->Log( Logger::LOG_MSG, "user:$loggedUserId UPDATERAW : $sql" );
 
@@ -814,16 +832,12 @@ class QPath
 
 		$token = null;
 
-		$tokens = $this->tokens;
-
 		// test one char tokens
 		$tokenSize = 1;
-		//if( in_array( $text[$pos], $tokens ) )
-        if( $this->_IsToken( $text[$pos], ($pos+1<$len?$text[$pos+1]:null) ) )
+		if( $this->_IsToken( $text[$pos], ($pos+1<$len?$text[$pos+1]:null) ) )
 		{
 			$token = array( 't_type' => $text[$pos] );
 
-			// if token is [ then produce the string going until next ]
 			if( $text[$pos] == '[' )
 			{
 				$nbToSkip = 0;
@@ -869,7 +883,6 @@ class QPath
 			while( ($pos+$i) < $len )
 			{
 				$c = $text[$pos+$i];
-				//if( in_array( $c, $tokens ) )
                 if( $this->_IsToken( $c, ($pos+$i+1<$len?$text[$pos+$i+1]:null) ) )
 					break;
 				if( ($c=='-') && ($pos+$i+1<$len) && ($text[$pos+$i+1]==">") )
@@ -907,10 +920,10 @@ class QPath
 			case '->':
 			case '<-':
 				$leftTravInfo = array();
-				$left = $this->_Traverse( $tree['left'], $leftTravInfo );
+				$this->_Traverse( $tree['left'], $leftTravInfo );
 
 				$rightTravInfo = array();
-				$right = $this->_Traverse( $tree['right'], $rightTravInfo );
+				$this->_Traverse( $tree['right'], $rightTravInfo );
 
 				$leftTableAlias = $leftTravInfo['table'];
 				if( isset( $leftTravInfo['tableAlias'] ) )
@@ -930,16 +943,17 @@ class QPath
 					$leftField = $leftTableAlias . '.id';
 					$rightField = $rightTableAlias . '.' . Singularize($leftTravInfo['table']).'_id';
 				}
+				else
+				{
+					$leftField = "UNKNOWN FIELD";
+					$rightField = "UNKNOWN FIELD";
+				}
 
 				// custom fields
 				if( isset( $tree['leftField'] ) )
 					$leftField = $leftTableAlias . '.' . $tree['leftField'];
 				if( isset( $tree['rightField'] ) )
 					$rightField = $rightTableAlias . '.' . $tree['rightField'];
-
-				$params = "";
-				if( isset( $tree['params'] ) )
-					$params = $tree['params'];
 
 				$travInfo["table"] = $leftTravInfo['table'];
 				if( isset( $leftTravInfo['tableAlias'] ) )
@@ -1075,7 +1089,7 @@ class QPath
 				break;
 
 			default:
-				return "ERROR";
+				break;
 		}
 	}
 
@@ -1105,7 +1119,7 @@ class QPath
 
 		$res = $this->db->Query( "DESCRIBE " . $tableName );
 		if( ! $res )
-			return "*TABLE $tableName DOES NOT EXIST!!!*";
+			return;
 
 		$rows = $this->db->LoadAllResultArray();
 		foreach( $rows as $row )

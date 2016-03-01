@@ -128,6 +128,18 @@ function HLibInclude( $libraryName )
 	// include the file
 	include_once( "lib/" . $libraryName . '.inc.php' );
 }
+
+/** @return Security */
+function HLibSecurity()
+{
+	return HLib("Security");
+}
+
+/** @return Measure */
+function HLibMeasure()
+{
+	return HLib("Measure");
+}
 	
 /*
  * Page parent object from which heritate every page used in this framework
