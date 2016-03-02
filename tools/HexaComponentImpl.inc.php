@@ -13,6 +13,7 @@ class HexaComponentImpl implements HexaComponent
 	 * Initialisation method, used to store $db and $qpath instances
 	 * @param mixed $db The Database instance
 	 * @param mixed $qpath The QPath instance
+	 * @return int 0 if success
 	 */
 	public function Init( $db, $qpath )
 	{
