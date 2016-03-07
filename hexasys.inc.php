@@ -129,24 +129,16 @@ function HLibInclude( $libraryName )
 	include_once( "lib/" . $libraryName . '.inc.php' );
 }
 
-// Typed wrappers to HLib() calls
-
-/** @return Security */
-function HLibSecurity() { return HLib("Security"); }
-/** @return Measure */
-function HLibMeasure() { return HLib("Measure"); }
-/** @return ServerState */
-function HLibServerState() { return HLib("ServerState"); }
-/** @return StoredVariables */
-function HLibStoredVariables() { return HLib("StoredVariables"); }
-/** @return HangOut */
-function HLibHangout() { return HLib("HangOut"); }
-/** @return LocaleInfo */
-function HLibLocaleInfo() { return HLib("LocaleInfo"); }
-/** @return BkgndJobs */
-function HLibBkgndJobs() { return HLib("BkgndJobs"); }
-/** @return Installation */
-function HLibInstallation() { return HLib("Installation"); }
+// PHPDoc typed wrappers to HLib() calls
+/** @return Security */ function HLibSecurity() { return HLib("Security"); }
+/** @return Measure */ function HLibMeasure() { return HLib("Measure"); }
+/** @return ServerState */ function HLibServerState() { return HLib("ServerState"); }
+/** @return StoredVariables */ function HLibStoredVariables() { return HLib("StoredVariables"); }
+/** @return HangOut */ function HLibHangout() { return HLib("HangOut"); }
+/** @return LocaleInfo */ function HLibLocaleInfo() { return HLib("LocaleInfo"); }
+/** @return BkgndJobs */ function HLibBkgndJobs() { return HLib("BkgndJobs"); }
+/** @return Installation */ function HLibInstallation() { return HLib("Installation"); }
+/** @return Session */ function HLibSession() { return HLib("Session"); }
 /*
  * Page parent object from which inherits every page used in this framework
  */
