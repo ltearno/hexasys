@@ -16,14 +16,14 @@
 
 // Search name of page to be displayed
 $container = false;
-if( isset( $_GET['container'] ) )
-	$container = $_GET['container'];
-else if( isset( $_POST['container'] ) )
-	$container = $_POST['container'];
-else if( isset( $defaultPage ) )
-	$container = $defaultPage;
+if( isset($_GET['container']) )
+    $container = $_GET['container'];
+else if( isset($_POST['container']) )
+    $container = $_POST['container'];
+else if( isset($defaultPage) )
+    $container = $defaultPage;
 else
-	$container = "home";
+    $container = "home";
 
 // store for putting that in the page
 $location = $container;
@@ -34,31 +34,31 @@ $parts = explode( ".", $container );
 $pageDirectory = APP_DIR . "pages/";
 if( $parts[0] == "sys" )
 {
-	$pageDirectory = HEXA_DIR . "pages/";
-	array_shift( $parts );
+    $pageDirectory = HEXA_DIR . "pages/";
+    array_shift( $parts );
 }
 
 // the container name is the last part of the string
 $container = array_pop( $parts );
 $containerDirectory = implode( "/", $parts );
 if( $containerDirectory != "" )
-	$containerDirectory .= "/";
+    $containerDirectory .= "/";
 
 // include page file
-$pageFile = $pageDirectory . $containerDirectory . 'page.' . $container. '.inc.php';
+$pageFile = $pageDirectory . $containerDirectory . 'page.' . $container . '.inc.php';
 $page = $container;
-if( isset( $_GET['class'] ) )
-	$page = $_GET['class'];
-else if( isset( $_POST['class'] ) )
-	$page = $_POST['class'];
+if( isset($_GET['class']) )
+    $page = $_GET['class'];
+else if( isset($_POST['class']) )
+    $page = $_POST['class'];
 
-if( ! file_exists( $pageFile ) )
+if( !file_exists( $pageFile ) )
 {
-	$pageFile = "pages/page.notFound.inc.php";
-	$page = "notFound";
+    $pageFile = "pages/page.notFound.inc.php";
+    $page = "notFound";
 }
 
-include_once( $pageFile );
+include_once($pageFile);
 
 // load the page code
 $classToCall = 'page_' . $page;
@@ -71,17 +71,17 @@ $params = array();
 $incomingParams = $_GET;
 foreach( $incomingParams as $param_name => $param_value )
 {
-	switch( $param_name )
-	{
-		case 'container' :
-		case 'class' :
-		case 'page' :
-			break;
-		default :
-			$params[$param_name] = $param_value;
-	}
+    switch( $param_name )
+    {
+        case 'container' :
+        case 'class' :
+        case 'page' :
+            break;
+        default :
+            $params[$param_name] = $param_value;
+    }
 }
 
 $pageObject->Execute( $params, $_POST );
-	
+
 ?>

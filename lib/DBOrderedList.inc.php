@@ -2,139 +2,140 @@
 
 class DBOrderedList
 {
-	/** @var QPath */
-	var $QPath;
+    /** @var QPath */
+    var $QPath;
 
-	/** @var string */
-	var $table;
+    /** @var string */
+    var $table;
 
-	/** @var string */
-	var $groupField;
+    /** @var string */
+    var $groupField;
 
-	/** @var string */
-	var $positionField;
+    /** @var string */
+    var $positionField;
 
-	public function __construct( $qpath, $table, $groupField, $positionField )
-	{
-		$this->QPath = $qpath;
-		$this->table = $table;
-		$this->groupField = $groupField;
-		$this->positionField = $positionField;
-	}
+    public function __construct( $qpath, $table, $groupField, $positionField )
+    {
+        $this->QPath = $qpath;
+        $this->table = $table;
+        $this->groupField = $groupField;
+        $this->positionField = $positionField;
+    }
 
-	public function getUpdateFunction()
-	{
-		$groupField = $this->groupField;
-		return function( QPath $qpath, $table, $idField, $id, $fieldName, $oldValue, $newValue )  use( $groupField )
-		{
-			if( $newValue < 0 )
-				return;
-				
-			$movedRecord = $qpath->QueryOne( "$table [$idField=$id]" );
-			if( $groupField == null )
-				$groupValue = null;
-			else
-				$groupValue = $movedRecord["$table.$groupField"];
+    public function getUpdateFunction()
+    {
+        $groupField = $this->groupField;
 
-			// check newValue integrity
-			if( $groupField == null )
-				$entries = $qpath->QueryEx( "$table" );
-			else
-				$entries = $qpath->QueryEx( "$table [$groupField=$groupValue]" );
-			if( $newValue >= $entries->GetNbRows() )
-				$newValue = $entries->GetNbRows() - 1;
+        return function( QPath $qpath, $table, $idField, $id, $fieldName, $oldValue, $newValue ) use ( $groupField )
+        {
+            if( $newValue < 0 )
+                return;
 
-			if( $groupField == null )
-				$groupingCondition = "";
-			else
-				$groupingCondition = "$groupField=$groupValue AND ";
-			$qpath->UpdateRaw( $table, "($groupingCondition $fieldName>$oldValue)", array( $fieldName=>"$fieldName-1" ) );
-			$qpath->UpdateRaw( $table, "($groupingCondition $fieldName>=$newValue)", array( $fieldName=>"$fieldName+1" ) );
-			$qpath->Update( $table, $idField.'='.$id, array( $fieldName => $newValue ) );
-		};
-	}
+            $movedRecord = $qpath->QueryOne( "$table [$idField=$id]" );
+            if( $groupField == null )
+                $groupValue = null;
+            else
+                $groupValue = $movedRecord["$table.$groupField"];
 
-	public function UpdatePosition( $recordId, $newPosition )
-	{
-		if( $newPosition < 0 )
-			return;
+            // check newValue integrity
+            if( $groupField == null )
+                $entries = $qpath->QueryEx( "$table" );
+            else
+                $entries = $qpath->QueryEx( "$table [$groupField=$groupValue]" );
+            if( $newValue >= $entries->GetNbRows() )
+                $newValue = $entries->GetNbRows() - 1;
 
-		$groupField = $this->groupField;
-		$positionField = $this->positionField;
+            if( $groupField == null )
+                $groupingCondition = "";
+            else
+                $groupingCondition = "$groupField=$groupValue AND ";
+            $qpath->UpdateRaw( $table, "($groupingCondition $fieldName>$oldValue)", array( $fieldName => "$fieldName-1" ) );
+            $qpath->UpdateRaw( $table, "($groupingCondition $fieldName>=$newValue)", array( $fieldName => "$fieldName+1" ) );
+            $qpath->Update( $table, $idField . '=' . $id, array( $fieldName => $newValue ) );
+        };
+    }
 
-		$table = $this->table;
-		$idField = "id";
-			
-		$movedRecord = $this->QPath->QueryOne( "$table [$idField=$recordId]" );
+    public function UpdatePosition( $recordId, $newPosition )
+    {
+        if( $newPosition < 0 )
+            return;
 
-		$oldPosition = $movedRecord["$table.$positionField"];
+        $groupField = $this->groupField;
+        $positionField = $this->positionField;
 
-		if( $oldPosition == $newPosition )
-			return;
+        $table = $this->table;
+        $idField = "id";
 
-		if( $groupField == null )
-			$groupValue = null;
-		else
-			$groupValue = $movedRecord["$table.$groupField"];
+        $movedRecord = $this->QPath->QueryOne( "$table [$idField=$recordId]" );
 
-		// check newPosition integrity
-		if( $groupField == null )
-			$entries = $this->QPath->QueryEx( "$table" );
-		else
-			$entries = $this->QPath->QueryEx( "$table [$groupField=$groupValue]" );
-		if( $newPosition >= $entries->GetNbRows() )
-			$newPosition = $entries->GetNbRows() - 1;
+        $oldPosition = $movedRecord["$table.$positionField"];
 
-		if( $groupField == null )
-			$groupingCondition = "";
-		else
-			$groupingCondition = "$groupField=$groupValue AND ";
-		$this->QPath->UpdateRaw( $table, "($groupingCondition $positionField>$oldPosition)", array( $positionField=>"$positionField-1" ) );
-		$this->QPath->UpdateRaw( $table, "($groupingCondition $positionField>=$newPosition)", array( $positionField=>"$positionField+1" ) );
-		$this->QPath->Update( $table, $idField.'='.$recordId, array( $positionField => $newPosition ) );
-	}
+        if( $oldPosition == $newPosition )
+            return;
 
-	public function Append( $fields )
-	{
-		if( $this->groupField!=null && (! isset( $fields[$this->groupField] )) )
-			return null;
+        if( $groupField == null )
+            $groupValue = null;
+        else
+            $groupValue = $movedRecord["$table.$groupField"];
 
-		if( $this->groupField == null )
-			$res =  $this->QPath->QueryEx( $this->table );
-		else
-			$res =  $this->QPath->QueryEx( $this->table . " [".$this->groupField."=".$fields[$this->groupField]."]" );
-		$position = $res->GetNbRows();
+        // check newPosition integrity
+        if( $groupField == null )
+            $entries = $this->QPath->QueryEx( "$table" );
+        else
+            $entries = $this->QPath->QueryEx( "$table [$groupField=$groupValue]" );
+        if( $newPosition >= $entries->GetNbRows() )
+            $newPosition = $entries->GetNbRows() - 1;
 
-		$fields[$this->positionField] = $position;
+        if( $groupField == null )
+            $groupingCondition = "";
+        else
+            $groupingCondition = "$groupField=$groupValue AND ";
+        $this->QPath->UpdateRaw( $table, "($groupingCondition $positionField>$oldPosition)", array( $positionField => "$positionField-1" ) );
+        $this->QPath->UpdateRaw( $table, "($groupingCondition $positionField>=$newPosition)", array( $positionField => "$positionField+1" ) );
+        $this->QPath->Update( $table, $idField . '=' . $recordId, array( $positionField => $newPosition ) );
+    }
 
-		$id = $this->QPath->Insert( $this->table, $fields );
+    public function Append( $fields )
+    {
+        if( $this->groupField != null && (!isset($fields[$this->groupField])) )
+            return null;
 
-		return $id;
-	}
+        if( $this->groupField == null )
+            $res = $this->QPath->QueryEx( $this->table );
+        else
+            $res = $this->QPath->QueryEx( $this->table . " [" . $this->groupField . "=" . $fields[$this->groupField] . "]" );
+        $position = $res->GetNbRows();
 
-	public function Delete( $condition )
-	{
-		$deleted = $this->QPath->QueryOne( $this->table . " [$condition]" );
-		$pos = $deleted[ $this->table . "." . $this->positionField ];
-		if( $this->groupField == null )
-			$groupValue = null;
-		else
-			$groupValue = $deleted[ $this->table . "." . $this->groupField ];
+        $fields[$this->positionField] = $position;
 
-		$res = $this->QPath->Delete( $this->table, $condition );
+        $id = $this->QPath->Insert( $this->table, $fields );
 
-		if( $res >= 0 )
-		{
-			if( $this->groupField == null )
-				$groupingCondition = "";
-			else
-				$groupingCondition = $this->groupField."=$groupValue AND";
+        return $id;
+    }
 
-			$this->QPath->UpdateRaw( $this->table, "($groupingCondition ".$this->positionField.">$pos)", array( $this->positionField=>($this->positionField."-1") ) );
-		}
+    public function Delete( $condition )
+    {
+        $deleted = $this->QPath->QueryOne( $this->table . " [$condition]" );
+        $pos = $deleted[$this->table . "." . $this->positionField];
+        if( $this->groupField == null )
+            $groupValue = null;
+        else
+            $groupValue = $deleted[$this->table . "." . $this->groupField];
 
-		return $res;
-	}
+        $res = $this->QPath->Delete( $this->table, $condition );
+
+        if( $res >= 0 )
+        {
+            if( $this->groupField == null )
+                $groupingCondition = "";
+            else
+                $groupingCondition = $this->groupField . "=$groupValue AND";
+
+            $this->QPath->UpdateRaw( $this->table, "($groupingCondition " . $this->positionField . ">$pos)", array( $this->positionField => ($this->positionField . "-1") ) );
+        }
+
+        return $res;
+    }
 }
 
 ?>

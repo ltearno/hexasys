@@ -2,100 +2,103 @@
 
 class RPCProxy
 {
-	var $baseUrl = "invalid://";
-	var $rpcEndpointPageAddress;
-	var $token = null;
-	
-	var $lastCalledUrl;
-	var $lastAnswer;
+    var $baseUrl = "invalid://";
+    var $rpcEndpointPageAddress;
+    var $token = null;
 
-	public function __construct( $baseUrl, $rpcEndpointPageAddress, $token )
-	{
-		$this->baseUrl = $baseUrl;
-		$this->rpcEndpointPageAddress = $rpcEndpointPageAddress;
-		$this->token = $token;
-	}
+    var $lastCalledUrl;
+    var $lastAnswer;
 
-	public function  __call( $name, $arguments )
-	{
-		$res = $this->callUrl( $name, $arguments, $rawAnswer );
+    public function __construct( $baseUrl, $rpcEndpointPageAddress, $token )
+    {
+        $this->baseUrl = $baseUrl;
+        $this->rpcEndpointPageAddress = $rpcEndpointPageAddress;
+        $this->token = $token;
+    }
 
-		return $res;
-	}
+    public function __call( $name, $arguments )
+    {
+        $res = $this->callUrl( $name, $arguments, $rawAnswer );
 
-	function callUrl( $method, $params, &$rawAnswer )
-	{
-		$url = "{$this->baseUrl}?container={$this->rpcEndpointPageAddress}";
-		
-		$this->lastCalledUrl = $url;
-		$this->lastAnswer = null;
+        return $res;
+    }
 
-		$postPayload = array(
-				"magic" => "v1",
-				"method" => $method,
-				"parameters" => json2string( $params ),
-				"user_security_token" => $this->token );
+    function callUrl( $method, $params, &$rawAnswer )
+    {
+        $url = "{$this->baseUrl}?container={$this->rpcEndpointPageAddress}";
 
-		$ch = curl_init( $url );
-		curl_setopt( $ch, CURLOPT_POST, true );
-		// curl_setopt( $ch, CURLOPT_HTTPHEADER, array( "Content-type: text/html; charset=UTF-8" ) );
-		curl_setopt( $ch, CURLOPT_POSTFIELDS, $postPayload );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-		$response = curl_exec( $ch );
-		curl_close( $ch );
+        $this->lastCalledUrl = $url;
+        $this->lastAnswer = null;
 
-		// remove BOM if present
-		$__BOM = pack( 'CCC', 239, 187, 191 );
-		if( 0 === strpos( $response, $__BOM ) )
-			$response = substr( $response, 3 );
+        $postPayload = array(
+            "magic" => "v1",
+            "method" => $method,
+            "parameters" => json2string( $params ),
+            "user_security_token" => $this->token );
 
-		$rawAnswer = $response;
-		$this->lastAnswer = $rawAnswer;
+        $ch = curl_init( $url );
+        curl_setopt( $ch, CURLOPT_POST, true );
+        // curl_setopt( $ch, CURLOPT_HTTPHEADER, array( "Content-type: text/html; charset=UTF-8" ) );
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $postPayload );
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+        $response = curl_exec( $ch );
+        curl_close( $ch );
 
-		$res = string2Json( $response );
+        // remove BOM if present
+        $__BOM = pack( 'CCC', 239, 187, 191 );
+        if( 0 === strpos( $response, $__BOM ) )
+            $response = substr( $response, 3 );
 
-		return $res;
-	}
+        $rawAnswer = $response;
+        $this->lastAnswer = $rawAnswer;
+
+        $res = string2Json( $response );
+
+        return $res;
+    }
 }
 
 class RPCServer
 {
-	// service real implementation
-	var $impl;
+    // service real implementation
+    var $impl;
 
-	public function __construct( $impl )
-	{
-		$this->impl = $impl;
-	}
+    public function __construct( $impl )
+    {
+        $this->impl = $impl;
+    }
 
-	public function ProcessRequest( $params )
-	{
-		if( (!isset( $params["magic"] )) || ($params["magic"]!="v1") )
-		{
-			echo "No fool !";
-			return null;
-		}
-		
-		if( !isset( $params["method"] ) )
-		{
-			echo "NO PARAMS GIVEN : ERROR<br/>";
-			return null;
-		}
+    public function ProcessRequest( $params )
+    {
+        if( (!isset($params["magic"])) || ($params["magic"] != "v1") )
+        {
+            echo "No fool !";
 
-		$method = $params["method"];
+            return null;
+        }
 
-		if( !isset( $params["parameters"] ) )
-		{
-			echo "NO PARAMS GIVEN : ERROR<br/>";
-			return null;
-		}
+        if( !isset($params["method"]) )
+        {
+            echo "NO PARAMS GIVEN : ERROR<br/>";
 
-		$parameters = string2Json( $params["parameters"] );
+            return null;
+        }
 
-		$res = call_user_func_array( array( $this->impl, $method ), $parameters );
+        $method = $params["method"];
 
-		echo json2string( $res );
-	}
+        if( !isset($params["parameters"]) )
+        {
+            echo "NO PARAMS GIVEN : ERROR<br/>";
+
+            return null;
+        }
+
+        $parameters = string2Json( $params["parameters"] );
+
+        $res = call_user_func_array( array( $this->impl, $method ), $parameters );
+
+        echo json2string( $res );
+    }
 }
 
 ?>

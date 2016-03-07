@@ -2,23 +2,24 @@
 
 abstract class PageProxySecure extends PageImpl
 {
-	abstract function ProcessQuery( $params );
+    abstract function ProcessQuery( $params );
 
-	public function Execute( $params, $posts )
-	{
-		HLibSecurity()->AnalyseLoggedUser();
+    public function Execute( $params, $posts )
+    {
+        HLibSecurity()->AnalyseLoggedUser();
 
-		$loggedUser = HLibSecurity()->GetLoggedUser();
-		if( $loggedUser == null )
-		{
-			echo "Not logged in<br/>";
-			return;
-		}
+        $loggedUser = HLibSecurity()->GetLoggedUser();
+        if( $loggedUser == null )
+        {
+            echo "Not logged in<br/>";
 
-		$params = array_merge( $params, $posts );
+            return;
+        }
 
-		$this->ProcessQuery( $params );
-	}
+        $params = array_merge( $params, $posts );
+
+        $this->ProcessQuery( $params );
+    }
 }
 
 ?>

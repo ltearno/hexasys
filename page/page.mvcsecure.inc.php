@@ -2,131 +2,130 @@
 
 abstract class PageMVCSecure extends PageMVC
 {
-	/** @var  PageState */
-	var $ctx;
+    /** @var  PageState */
+    var $ctx;
 
-	function Execute( $params, $posts )
-	{
-		// Initialize the PageState that will enable us to manage our url, create buttons and so on
-		$this->ctx = new PageState();
-		$this->ctx->initState( $this, array() );
-		$this->ctx->loadStateFromPageParams( $params, $posts );
+    function Execute( $params, $posts )
+    {
+        // Initialize the PageState that will enable us to manage our url, create buttons and so on
+        $this->ctx = new PageState();
+        $this->ctx->initState( $this, array() );
+        $this->ctx->loadStateFromPageParams( $params, $posts );
 
-		$message = "";
+        $message = "";
 
-		// user wants to log out
-		if( $this->ctx->getItem( "logout" ) )
-		{
-			HLibSecurity()->LogOut();
-				
-			$this->ctx->updateState( array( "logout" => null ) );
-				
-			$message .= "Bye bye !<br/>";
-				
-			$this->ctx->updateState( array( "login"=>null, "pass"=>null, "pass_md5"=>null ) );
-		}
+        // user wants to log out
+        if( $this->ctx->getItem( "logout" ) )
+        {
+            HLibSecurity()->LogOut();
 
-		$loggedUser = HLibSecurity()->GetLoggedUser();
-		if( $loggedUser == null )
-		{
-			// we should find a way to log the user in
-				
-			// get an app provided logging facility, if any
-			$iUserPasswordLogin = HLibSecurity()->GetUserPasswordLogin();
-			if( $iUserPasswordLogin != null )
-			{
-				// test if a login information has been provided
-				$login = $this->ctx->getItem( "login" );
-				$password = $this->ctx->getItem( "pass" );
-				$passwordMd5 = $password != null ? md5( $password ) : $this->ctx->getItem( "pass_md5" );
+            $this->ctx->updateState( array( "logout" => null ) );
 
-				if( $login!=null && $passwordMd5!=null )
-				{
-					$iUserPasswordLogin->TryLoginUser( $login, $passwordMd5 );
-						
-					$loggedUser = HLibSecurity()->GetLoggedUser();
-					if( $loggedUser == null )
-					{
-						$message .= "Wrong login information provided, please try to log in again";
-					}
-					else
-					{
-						$message .= "Welcome on " . $loggedUser["users.first"] . " " . $loggedUser["users.last"];
-					}
-				}
+            $message .= "Bye bye !<br/>";
 
-				if( $loggedUser == null )
-				{
-					// otherwise, provide a login form to enter credentials
-						
-					$this->generateHeaderPart();
+            $this->ctx->updateState( array( "login" => null, "pass" => null, "pass_md5" => null ) );
+        }
 
-					echo "<div style='margin:10px;border:1px solid grey;border-radius:5px;padding:10px;'>";
-					echo "<form method='post' action='".$this->ctx->getUrl($this->ctx->getState())."'>";
-					echo "<table>";
-					echo "<tr><td colspan=2>Please provide your login and password</td></tr>";
-					echo "<tr><td>login</td><td><input type='text' name='login'/></td></tr>";
-					echo "<tr><td>password</td><td><input type='password' name='pass'/></td></tr>";
-					echo "<tr><td></td><td><input type='submit' value='log in'/></td></tr>";
-					echo "</table>";
-					echo "</form>";
-					echo "<span style='color:red;font-weight:bold;'>$message</span>";
-					echo "</div>";
+        $loggedUser = HLibSecurity()->GetLoggedUser();
+        if( $loggedUser == null )
+        {
+            // we should find a way to log the user in
 
-					$this->generateFooterPart();
+            // get an app provided logging facility, if any
+            $iUserPasswordLogin = HLibSecurity()->GetUserPasswordLogin();
+            if( $iUserPasswordLogin != null )
+            {
+                // test if a login information has been provided
+                $login = $this->ctx->getItem( "login" );
+                $password = $this->ctx->getItem( "pass" );
+                $passwordMd5 = $password != null ? md5( $password ) : $this->ctx->getItem( "pass_md5" );
 
-					return;
-				}
-			}
-		}
-		else
-		{
-			$message .= "Logged as " . $loggedUser["users.first"] . " " . $loggedUser["users.last"];
-		}
+                if( $login != null && $passwordMd5 != null )
+                {
+                    $iUserPasswordLogin->TryLoginUser( $login, $passwordMd5 );
 
-		// refresh the logged user data
-		$loggedUser = HLibSecurity()->GetLoggedUser();
+                    $loggedUser = HLibSecurity()->GetLoggedUser();
+                    if( $loggedUser == null )
+                    {
+                        $message .= "Wrong login information provided, please try to log in again";
+                    }
+                    else
+                    {
+                        $message .= "Welcome on " . $loggedUser["users.first"] . " " . $loggedUser["users.last"];
+                    }
+                }
 
-		// should not happen !
-		if( $loggedUser == null )
-		{
-			$this->generateHeaderPart();
-				
-			echo "<div style='margin:10px;border:1px solid grey;border-radius:5px;padding:10px;'>";
-			echo "general error : no way to log you in, sorry !";
-			echo "</div>";
-				
-			$this->generateFooterPart();
-				
-			return;
-		}
+                if( $loggedUser == null )
+                {
+                    // otherwise, provide a login form to enter credentials
 
-		// if the user has not the right permission, leave
-		if( ! HLibSecurity()->TestPermission( 'AdminPages' ) )
-		{
-			$this->generateHeaderPart();
-				
-			echo "You don't have right to use these pages. If you think you should, contact your admin at <a href='mailto:" . ADMINISTRATOR_EMAIL . "'>".ADMINISTRATOR_EMAIL."</a><br/>";
-			echo $this->ctx->getHref("logout", array("logout"=>true)) . "<br/>";
-				
-			$this->generateFooterPart();
+                    $this->generateHeaderPart();
 
-			return;
-		}
+                    echo "<div style='margin:10px;border:1px solid grey;border-radius:5px;padding:10px;'>";
+                    echo "<form method='post' action='" . $this->ctx->getUrl( $this->ctx->getState() ) . "'>";
+                    echo "<table>";
+                    echo "<tr><td colspan=2>Please provide your login and password</td></tr>";
+                    echo "<tr><td>login</td><td><input type='text' name='login'/></td></tr>";
+                    echo "<tr><td>password</td><td><input type='password' name='pass'/></td></tr>";
+                    echo "<tr><td></td><td><input type='submit' value='log in'/></td></tr>";
+                    echo "</table>";
+                    echo "</form>";
+                    echo "<span style='color:red;font-weight:bold;'>$message</span>";
+                    echo "</div>";
 
-		echo "<div style='margin:0 10px;margin-bottom:5px;border:1px solid grey;border-bottom-left-radius:5px;border-bottom-right-radius:5px;padding:3px;'>";
-		echo $message . " - you are on ". SYNCHRO_SITE_NAME ." - " . $this->ctx->getHref("logout", array("logout"=>true)) . " - " . $this->ctx->getHref("refresh",$this->ctx->getState()) . "<br/>";
-		echo "</div>";
+                    $this->generateFooterPart();
 
-		try
-		{
-			parent::Execute( $params, $posts );
-		}
-		catch( SecurityException $e )
-		{
-			echo "You don't have the right permission do take this action, please contact your system adminstrator if you feel that you should be granted access to this functionality <br/>";
-		}
-	}
+                    return;
+                }
+            }
+        }
+        else
+        {
+            $message .= "Logged as " . $loggedUser["users.first"] . " " . $loggedUser["users.last"];
+        }
+
+        // refresh the logged user data
+        $loggedUser = HLibSecurity()->GetLoggedUser();
+
+        // should not happen !
+        if( $loggedUser == null )
+        {
+            $this->generateHeaderPart();
+
+            echo "<div style='margin:10px;border:1px solid grey;border-radius:5px;padding:10px;'>";
+            echo "general error : no way to log you in, sorry !";
+            echo "</div>";
+
+            $this->generateFooterPart();
+
+            return;
+        }
+
+        // if the user has not the right permission, leave
+        if( !HLibSecurity()->TestPermission( 'AdminPages' ) )
+        {
+            $this->generateHeaderPart();
+
+            echo "You don't have right to use these pages. If you think you should, contact your admin at <a href='mailto:" . ADMINISTRATOR_EMAIL . "'>" . ADMINISTRATOR_EMAIL . "</a><br/>";
+            echo $this->ctx->getHref( "logout", array( "logout" => true ) ) . "<br/>";
+
+            $this->generateFooterPart();
+
+            return;
+        }
+
+        echo "<div style='margin:0 10px;margin-bottom:5px;border:1px solid grey;border-bottom-left-radius:5px;border-bottom-right-radius:5px;padding:3px;'>";
+        echo $message . " - you are on " . SYNCHRO_SITE_NAME . " - " . $this->ctx->getHref( "logout", array( "logout" => true ) ) . " - " . $this->ctx->getHref( "refresh", $this->ctx->getState() ) . "<br/>";
+        echo "</div>";
+
+        try
+        {
+            parent::Execute( $params, $posts );
+        } catch( SecurityException $e )
+        {
+            echo "You don't have the right permission do take this action, please contact your system adminstrator if you feel that you should be granted access to this functionality <br/>";
+        }
+    }
 }
 
 ?>

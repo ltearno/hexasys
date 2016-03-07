@@ -6,6 +6,7 @@
  * This was an attempt but turned out to be not so good...
  */
 $qwalk_history = array();
+
 class QWalk
 {
     /* @var $db Database */
@@ -24,19 +25,19 @@ class QWalk
     // @return QWalk
     public static function newQWalk( Database $db, $table, $idField, $id, $rawRecord = null )
     {
-		// Caching is a good idea, but sometimes since it is never invalidated it gives bad data...
+        // Caching is a good idea, but sometimes since it is never invalidated it gives bad data...
         //if( isset( QWalk::$cachedTables[$table.'*'.$idField][$id] ) )
         //    return QWalk::$cachedTables[$table.'*'.$idField][$id];
-		
-		//if( ! isset( QWalk::$cachedTables[$table.'*'.$idField] ) )
+
+        //if( ! isset( QWalk::$cachedTables[$table.'*'.$idField] ) )
         //    QWalk::$cachedTables[$table.'*'.$idField] = array();
 
         $w = new QWalk( $db, $table, $idField, $id, $rawRecord );
-		if( $w->rawRecord == null )
-			return null;
+        if( $w->rawRecord == null )
+            return null;
 
         //QWalk::$cachedTables[$table.'*'.$idField][$id] = $w;
-        
+
         return $w;
     }
 
@@ -67,7 +68,8 @@ class QWalk
     {
         $res = array();
         foreach( $this->rawRecord as $field => $value )
-            $res[$this->table.'.'.$field] = $value;
+            $res[$this->table . '.' . $field] = $value;
+
         return $res;
     }
 
@@ -78,19 +80,19 @@ class QWalk
         $this->db->Query( $sql );
     }
 
-    public function  __call( $name,  $arguments )
+    public function __call( $name, $arguments )
     {
         $extTable = null;
         $extIdField = null;
-        if( isset( $arguments[0] ) )
+        if( isset($arguments[0]) )
             $extTable = $arguments[0];
-        if( isset( $arguments[1] ) )
+        if( isset($arguments[1]) )
             $extIdField = $arguments[1];
 
         return $this->getFather( $name, $extTable, $extIdField );
     }
 
-    public function  __get($name)
+    public function __get( $name )
     {
         return $this->get( $name );
     }
@@ -100,7 +102,7 @@ class QWalk
         return $this->rawRecord[$field];
     }
 
-    public function getFather( $field, $externalTable=null, $externalIdField = null )
+    public function getFather( $field, $externalTable = null, $externalIdField = null )
     {
         if( $externalTable == null )
             $externalTable = Pluralize( substr( $field, 0, -3 ) );
@@ -124,11 +126,11 @@ class QWalk
         if( $externalRefIdField == null )
             $externalRefIdField = Singularize( $this->table ) . "_id";
 
-        if( isset( $this->cacheChildren[$externalTable.'*'.$externalRefIdField] ) )
-            return $this->cacheChildren[$externalTable.'*'.$externalRefIdField];
+        if( isset($this->cacheChildren[$externalTable . '*' . $externalRefIdField]) )
+            return $this->cacheChildren[$externalTable . '*' . $externalRefIdField];
 
         // search all entries pointing to us and return an array of QWalk
-        $this->query( "SELECT * FROM $externalTable WHERE $externalRefIdField=".$this->id );
+        $this->query( "SELECT * FROM $externalTable WHERE $externalRefIdField=" . $this->id );
         $childs = $this->db->LoadAllResultAssoc();
         $res = array();
         foreach( $childs as $childDB )
@@ -139,12 +141,11 @@ class QWalk
         }
 
         // cache the chilren and remember we have the full table now...
-        $this->cacheChildren[$externalTable.'*'.$externalRefIdField] = $res;
+        $this->cacheChildren[$externalTable . '*' . $externalRefIdField] = $res;
 
         return $res;
     }
 }
-
 
 
 ?>
