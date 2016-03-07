@@ -496,6 +496,11 @@ class QPath
 		return $fields;
 	}
 
+	function HasTable($tableName)
+	{
+		return in_array($tableName, $this->GetTables());
+	}
+
 	function GetTables()
 	{
 		$tables = array();
