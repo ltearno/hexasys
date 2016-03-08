@@ -85,7 +85,10 @@ abstract class PageMVC extends PageImpl
         $out = $this->header;
         $out = str_replace( '###TITLE###', $this->Title, $out );
 
-        $out = str_replace( '###HEXA_DIR###', HEXA_SYS_URL, $out );
+        if( defined( "HEXA_SYS_URL" ) )
+            $out = str_replace( '###HEXA_DIR###', HEXA_SYS_URL, $out );
+        else
+            $out = str_replace( '###HEXA_DIR###', "", $out );
 
         echo $out;
         echo "<div class='content'>";
