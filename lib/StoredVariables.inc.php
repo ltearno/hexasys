@@ -20,7 +20,7 @@ class StoredVariables extends HexaComponentImpl
 {
     private function getVariableFileName( $domainUID, $variableName )
     {
-        $variableDirectory = APP_DIR . "sys/vars/" . $domainUID . "/";
+        $variableDirectory = APP_DATA_DIR . "sys/vars/" . $domainUID . "/";
         ensureDirectoryExists( $variableDirectory );
 
         return $variableDirectory . $variableName;

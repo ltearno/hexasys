@@ -18,7 +18,7 @@ class Logger
 
     public function Init( $fileName, $logLevel )
     {
-        $logDir = APP_DIR . 'logs/' . date( 'Y-m-d', strtotime( 'now' ) );
+        $logDir = APP_DATA_DIR . 'logs/' . date( 'Y-m-d', strtotime( 'now' ) );
         ensureDirectoryExists( $logDir );
 
         $this->logFile = fopen( $logDir . '/' . $fileName, 'a' );
