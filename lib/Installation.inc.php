@@ -54,13 +54,11 @@ class Installation extends HexaComponentImpl
         foreach( $newTables as $newTable )
         {
             $desc = $targetDbDesc[$newTable];
-            //echo "New table $newTable<br/>";
-
-            $keys = "";
-            $keysComa = 0;
 
             $sql = "CREATE TABLE `$newTable` ( ";
             $coma = false;
+            $keys = array();
+            $primaryKeys = array();
             foreach( $desc["fields"] as $fieldName => $fieldDesc )
             {
                 if( $coma )
@@ -69,14 +67,16 @@ class Installation extends HexaComponentImpl
                 $sql .= $this->GetColumnSql( $fieldName, $fieldDesc, $currentDB );
 
                 if( array_key_exists( "primary_key", $fieldDesc ) )
-                    $keys .= ($keysComa++ > 0 ? ", " : "") . "PRIMARY KEY (`$fieldName`)";
+                    $primaryKeys[] = "`$fieldName`";
                 else if( array_key_exists( "unique_key", $fieldDesc ) )
-                    $keys .= ($keysComa++ > 0 ? ", " : "") . "UNIQUE KEY `$fieldName` (`$fieldName`)";
+                    $keys[] = "UNIQUE KEY `$fieldName` (`$fieldName`)";
                 else if( array_key_exists( "multiple_index", $fieldDesc ) )
-                    $keys .= ($keysComa++ > 0 ? ", " : "") . "KEY `$fieldName` (`$fieldName`)";
+                    $keys[] = "KEY `$fieldName` (`$fieldName`)";
             }
-            if( $keys != "" )
-                $sql .= ", " . $keys;
+            if( count( $primaryKeys ) > 0 )
+                $keys[] = "PRIMARY KEY (" . implode( ",", $primaryKeys ) . ")";
+            if( count( $keys ) > 0 )
+                $sql .= ", " . implode( ", ", $keys );
             $sql .= " ) ENGINE=InnoDB  DEFAULT CHARSET=utf8";
 
             $sqls[] = $sql;
