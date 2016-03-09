@@ -358,7 +358,7 @@ class Database
 
         try
         {
-            $this->pdo = new PDO( $dsn, $this->user, $this->password );//, array("PDO::MYSQL_ATTR_INIT_COMMAND"=>"SET NAMES UTF8") );
+            $this->pdo = new PDO( $dsn, $this->user, $this->password, array( PDO::MYSQL_ATTR_LOCAL_INFILE => true, PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES UTF8" ) );//, array("PDO::MYSQL_ATTR_INIT_COMMAND"=>"SET NAMES UTF8") );
 
             $this->pdo->exec( 'SET NAMES utf8;' );
             $this->pdo->exec( "SET @@session.sql_mode= 'NO_ENGINE_SUBSTITUTION';" );
@@ -426,7 +426,7 @@ class Database
     }
 
     // returns an array containing the description of the database schema
-    public function GetDatabaseDescription( $dbName = null )
+    public function GetDatabaseDescription( $hideSynchroFields = true, $dbName = null )
     {
         if( $dbName == null )
             $dbName = $this->database;
@@ -455,7 +455,7 @@ class Database
             {
                 $fieldName = $field['Field'];
 
-                if( 0 == strncmp( $fieldName, "synchro_server", 14 ) )
+                if( $hideSynchroFields && 0 == strncmp( $fieldName, "synchro_server", 14 ) )
                     continue;
 
                 $tableDesc['fields'][$fieldName] = array( "type" => $field['Type'], "null" => $field['Null'], "default" => $field['Default'], "extra" => $field['Extra'] );
