@@ -359,7 +359,6 @@ class Database
 
         try
         {
-            $this->pdo = null;
             $this->pdo = new PDO( $dsn, $this->user, $this->password );//, array("PDO::MYSQL_ATTR_INIT_COMMAND"=>"SET NAMES UTF8") );
 
             $this->pdo->exec( 'SET NAMES utf8;' );
