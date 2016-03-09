@@ -71,7 +71,7 @@ function date_parse_ex( $date, &$year, &$month, &$day )
     $day = substr( $date, 8, 2 );
 }
 
-function intdiv( $q, $d )
+function intdiv_ex( $q, $d )
 {
     $reste = $q % $d;
     $res = ($q - $reste) / $d;
@@ -91,7 +91,7 @@ function date_get_day( $date )
     $z = ($m < 3) ? $y - 1 : $y;
     $r = ($m < 3) ? 0 : 2;
 
-    return (intdiv( 23 * $m, 9 ) + $d + 4 + $y + intdiv( $z, 4 ) - intdiv( $z, 100 ) + intdiv( $z, 400 ) - $r) % 7;
+    return (intdiv_ex( 23 * $m, 9 ) + $d + 4 + $y + intdiv_ex( $z, 4 ) - intdiv_ex( $z, 100 ) + intdiv_ex( $z, 400 ) - $r) % 7;
 }
 
 function now()
