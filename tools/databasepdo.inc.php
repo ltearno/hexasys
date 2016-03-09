@@ -27,7 +27,6 @@ class Database
 
     public function Init( $options )
     {
-        //$this->host		= array_key_exists('host', $options)	? $options['host']		: $this->host;
         $hostAndPort = array_key_exists( 'host', $options ) ? $options['host'] : $this->host;
         $parts = explode( ":", $hostAndPort );
         if( count( $parts ) == 1 )
@@ -43,7 +42,7 @@ class Database
         else
         {
             echo "BAD CONFIGURATION FOR PDO, HOST SPEC IS INVALID : $hostAndPort !!!";
-            // TODO : should explode at this point, anyway it will in few moments...
+            // TODO : should explode at this point, anyway it will crash in few moments...
         }
 
         $this->user = array_key_exists( 'user', $options ) ? $options['user'] : $this->user;
