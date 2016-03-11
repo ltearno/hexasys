@@ -236,9 +236,14 @@ class Calendar
         return $this->_GetBoundaries( $tree, $from, $to );
     }
 
-    // takes as a parameter an array of period expressions and their initial values
-    // returns an associative calendar that is the merge of all these
-    // $addFunction is a callback that can combine two period values
+    /**
+     * takes as a parameter an array of period expressions and their initial values
+     * returns an associative calendar that is the merge of all these
+     *
+     * @param $periodsAndValues
+     * @param $addFunction
+     * @return CalendarPeriodAssociative|null
+     */
     function MakeUpCalendarPeriodAssociative( $periodsAndValues, $addFunction )
     {
         $nbPeriod = count( $periodsAndValues );
