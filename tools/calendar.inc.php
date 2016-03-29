@@ -6,7 +6,7 @@ date_default_timezone_set( "UTC" );
  */
 function date2Display( $date )
 {
-    return date2DisplayEx( $date, HLib( "LocaleInfo" )->GetLocale() );
+    return date2DisplayEx( $date, HLibLocaleInfo()->GetLocale() );
 }
 
 function date2DisplayEx( $date, $locale )
@@ -316,7 +316,7 @@ class Calendar
 
     function GetBeautiful( $tree )
     {
-        return $this->GetBeautifulEx( $tree, HLib( "LocaleInfo" )->GetLocale() );
+        return $this->GetBeautifulEx( $tree, HLibLocaleInfo()->GetLocale() );
     }
 
     function GetBeautifulEx( $tree, $locale )
@@ -809,7 +809,7 @@ class CalendarPeriod
 
     function GetBeautiful()
     {
-        return $this->GetBeautifulEx( HLib( "LocaleInfo" )->GetLocale() );
+        return $this->GetBeautifulEx( HLibLocaleInfo()->GetLocale() );
     }
 
     function GetBeautifulEx( $locale )
@@ -1229,7 +1229,7 @@ class CalendarPeriod
             $firstOccurence = date_add_day( $firstOccurence, 7 );
         }
 
-        // HLib("ServerState")->AddMessage( $msg );
+        // HLibServerState()->AddMessage( $msg );
     }
 
     // NOT operator

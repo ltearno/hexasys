@@ -163,7 +163,7 @@ class Database
         $this->FreeResult();
 
         // start a time measure
-        $m = HLib( "Measure" )->Start();
+        $m = HLibMeasure()->Start();
 
         $this->statement = $this->pdo->prepare( $sql );
         if( $this->statement == null )
@@ -176,7 +176,7 @@ class Database
 
         $res = $this->statement->execute();
 
-        $ms = HLib( "Measure" )->End( $m );
+        $ms = HLibMeasure()->End( $m );
         if( $ms > 1000 )
         {
             $log = new Logger();
