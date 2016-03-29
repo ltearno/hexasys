@@ -7,6 +7,8 @@ class HexaComponentImpl implements HexaComponent
 {
     /* @var $QPath QPath */
     var $QPath = null;
+
+    /** @var Database */
     var $db = null;
 
     /**
