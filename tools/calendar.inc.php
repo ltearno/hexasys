@@ -457,7 +457,7 @@ class Calendar
 
     private function _GetBoundaries( $tree, &$from, &$to )
     {
-        $flat = $this->GetFlatInternal( $tree );
+        $flat = $this->GetFlat( $tree );
         if( $flat == null )
         {
             echo "ERROR : flat is null with tree :";
