@@ -522,6 +522,7 @@ class QPath
         return $this->db->Query( $query );
     }
 
+    /** @return int the transaction id to use for CloseTransaction */
     public function StartTransaction()
     {
         $transactionId = $this->db->StartTransaction();

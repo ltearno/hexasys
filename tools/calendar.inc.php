@@ -1106,17 +1106,23 @@ class CalendarPeriod
      */
     function TrimPeriods()
     {
+        $needNewArray = false;
+
         foreach( $this->periods as $i => $period )
         {
             if( $this->periods[$i][0] == $this->periods[$i][1] ) // One single day, delete period
             {
                 unset($this->periods[$i]);
+                $needNewArray = true;
                 continue;
             }
 
             // Trim
             $this->periods[$i][1] = date_add_day( $this->periods[$i][1], -1 );
         }
+
+        if( $needNewArray )
+            $this->periods = array_values( $this->periods );
     }
 
     function UntrimPeriods()
