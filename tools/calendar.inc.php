@@ -160,9 +160,6 @@ function push( &$arr, &$elem )
     $arr[] = $elem;
 }
 
-$treeCache = array();
-$flatCache = array();
-
 class Calendar
 {
     function Parse( $expression )
@@ -364,20 +361,12 @@ class Calendar
         }
     }
 
+    /**
+     * @param $tree
+     * @return CalendarPeriod
+     */
     function GetFlat( $tree )
     {
-        $flat = $this->GetFlatInternal( $tree );
-
-        return $flat;
-    }
-
-    function GetFlatInternal( $tree )
-    {
-        global $flatCache;
-
-// 		if( isset($tree["_expression_"]) && isset($flatCache[$tree["_expression_"]]) )
-// 			return $flatCache[$tree["_expression_"]];
-
         // on commence par la racine
         $stack = array();
         array_push( $stack, new RefHolder( $tree ) );
@@ -463,9 +452,6 @@ class Calendar
 
         $res = $nodeRef->ref['flat'];
 
-// 		if( isset($tree["_expression_"]) )
-// 			$flatCache[$tree["_expression_"]] = $res;
-
         return $res;
     }
 
@@ -483,11 +469,6 @@ class Calendar
 
     private function _Parse( $expression )
     {
-        global $treeCache;
-
-        //if( $treeCache!=null && isset($treeCache[$expression]) )
-        //	return $treeCache[$expression];
-
         $pos = 0;
 
         $stack = array();
@@ -534,11 +515,9 @@ class Calendar
             }
         }
 
+        // parsing error
         if( count( $stack ) != 1 )
             return null;
-
-        $treeCache[$expression] = $stack[0];
-        $treeCache[$expression]["_expression_"] = $expression;
 
         return $stack[0];
     }
@@ -1005,8 +984,7 @@ class CalendarPeriod
         if( count( $this->periods ) == 0 )
         {
             $from = TIME_BEGIN;
-            $to = TIME_BEGIN; // change made on the 2011-02-10, hope it doesn't break anyting...
-            // $to = TIME_END;
+            $to = TIME_BEGIN;
             return 0;
         }
 
