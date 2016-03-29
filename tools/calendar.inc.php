@@ -965,7 +965,7 @@ class CalendarPeriod
             // number of seconds
             $nbSec = (strtotime( $period[1] ) - strtotime( $period[0] ));
 
-            $nbNights += $nbSec / 86400;
+            $nbNights += (int) ($nbSec / 86400);
         }
 
         return $nbNights;
@@ -985,6 +985,7 @@ class CalendarPeriod
         {
             $from = TIME_BEGIN;
             $to = TIME_BEGIN;
+
             return 0;
         }
 
