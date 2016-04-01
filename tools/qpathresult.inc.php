@@ -92,9 +92,8 @@ class QPathResultUseInformation
         if( !defined( 'TRACE_UNUSED_QPATHRESULT_FIELDS' ) || !TRACE_UNUSED_QPATHRESULT_FIELDS )
             return;
 
-        $dir = APP_DIR . 'logs/qpath_stacktraces';
-        if( !is_dir( $dir ) )
-            mkdir( $dir );
+        $dir = APP_DATA_DIR . 'logs/qpath_stacktraces/' . date( 'Y-m-d', strtotime( 'now' ) );
+        ensureDirectoryExists( $dir );
 
         foreach( self::$datas as $traceId => $report )
         {
@@ -117,6 +116,7 @@ class QPathResultUseInformation
             fwrite( $stackFile, "TRACE_ID: $traceId\r\n\r\n" );
             fwrite( $stackFile, "CALL STACK:\r\n{$report['stackTrace']}\r\n\r\n" );
             fwrite( $stackFile, "NUMBER OF RESULT ROWS: " . $report['nbRows'] . "\r\n\r\n" );
+            fwrite( $stackFile, "USED/FETCHED: " . count( $used ) . " / " . count( $fetched ) . "\r\n\r\n" );
             fwrite( $stackFile, "FETCHED FIELDS:\r\n" . DumpCode( $fetched ) . "\r\n\r\n" );
             fwrite( $stackFile, "USED ALL IN ONE: " . ($report['usedAllInOne'] ? "YES" : "NO") . "\r\n\r\n" );
             fwrite( $stackFile, "USED FIELDS:\r\n" . DumpCode( $used ) . "\r\n\r\n" );
