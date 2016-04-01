@@ -217,24 +217,12 @@ class QPath
      */
     function QueryEx( $expression )
     {
-        // start a time measure
-        $m = HLibMeasure()->Start();
-
         $sql = $this->Parse( $expression );
         $this->db->Query( $sql );
 
         /* @var $res QPathResult */
         $res = new QPathResult();
         $res->Set( array_flip( $this->db->GetFieldsNames() ), $this->db->LoadAllResultArray() );
-
-        $ms = HLibMeasure()->End( $m );
-        if( $ms > 2000 )
-        {
-            $log = new Logger();
-            $log->Init( 'qpath-long_requests.txt', Logger::LOG_MSG );
-            $log->Log( Logger::LOG_MSG, "Time for a request $ms ms. for request : '$expression'" );
-            $log->Term();
-        }
 
         if( $this->alwaysLog || $this->db->IsError() )
             $this->logger->Log( Logger::LOG_MSG, 'QUERY_EX : ' . $expression . ' ( ' . $res->GetNbRows() . ' rows )' );
@@ -490,14 +478,9 @@ class QPath
 
     function GetTableFields( $tableName )
     {
-        $fields = array();
+        $this->_EnsureCachedTableFields( $tableName );
 
-        $this->db->Query( "DESCRIBE " . $tableName );
-        $rows = $this->db->LoadAllResultArray();
-        foreach( $rows as $row )
-            $fields[] = $row[0];
-
-        return $fields;
+        return $this->cacheFieldsExhaustive[$tableName];
     }
 
     function HasTable( $tableName )
@@ -1136,6 +1119,22 @@ class QPath
         return implode( ", ", $fields );
     }
 
+    private $dbDesc;
+
+    private function _EnsureDbDesc()
+    {
+        if( $this->dbDesc != null )
+            return;
+
+        $this->dbDesc = HLibStoredVariables()->Read( "QPATH_CACHE", "DATABASE_SCHEMA_CACHE" );
+
+        if( $this->dbDesc == null )
+        {
+            $this->dbDesc = $this->db->GetDatabaseDescription( false );
+            HLibStoredVariables()->Store( "QPATH_CACHE", "DATABASE_SCHEMA_CACHE", $this->dbDesc );
+        }
+    }
+
     private function _EnsureCachedTableFields( $tableName )
     {
         if( isset($this->cacheFields[$tableName]) )
@@ -1143,10 +1142,23 @@ class QPath
 
         global $IGNORED_FIELDS;
 
+        $this->_EnsureDbDesc();
+
         $this->cacheFields[$tableName] = array();
         $this->cacheFieldsExhaustive[$tableName] = array();
 
-        $res = $this->db->Query( "DESCRIBE " . $tableName );
+        if( !isset($this->dbDesc[$tableName]) )
+            return;
+
+        foreach( $this->dbDesc[$tableName]['fields'] as $fieldName => $fieldDesc )
+        {
+            $this->cacheFieldsExhaustive[$tableName][] = $fieldName;
+
+            if( !in_array( $fieldName, $IGNORED_FIELDS ) )
+                $this->cacheFields[$tableName][] = $fieldName;
+        }
+
+        /*$res = $this->db->Query( "DESCRIBE " . $tableName );
         if( !$res )
             return;
 
@@ -1157,7 +1169,7 @@ class QPath
 
             if( !in_array( $row[0], $IGNORED_FIELDS ) )
                 $this->cacheFields[$tableName][] = $row[0];
-        }
+        }*/
     }
 }
 

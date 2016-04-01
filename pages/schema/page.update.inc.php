@@ -36,6 +36,9 @@ class page_update extends PageMVCSecure
         // execute required actions
         if( isset($params['execute']) && $params['execute'] == "yes" )
         {
+            // Hack : destroy QPath's cache
+            HLibStoredVariables()->Remove( "QPATH_CACHE", "DATABASE_SCHEMA_CACHE" );
+
             echo "Execution of the SQL statements<br/>";
             echo "<table>";
             echo TableHeader( array( "SQL statement", "Result" ) );
