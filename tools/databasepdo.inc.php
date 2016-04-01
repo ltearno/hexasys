@@ -1,5 +1,8 @@
 <?php
 
+if( !defined( "LONG_QUERY_LIMIT" ) )
+    define( "LONG_QUERY_LIMIT", 2000 );
+
 // helper
 function DBFieldDescHasReference( $table, $field, $refs )
 {
@@ -177,11 +180,11 @@ class Database
         $res = $this->statement->execute();
 
         $ms = HLibMeasure()->End( $m );
-        if( $ms > 1000 )
+        if( $ms > LONG_QUERY_LIMIT )
         {
             $log = new Logger();
             $log->Init( 'database-pdo-long_requests-' . $this->database . '.txt', Logger::LOG_MSG );
-            $log->Log( Logger::LOG_MSG, "Time for a request $ms ms. for request : '$sql" );
+            $log->Log( Logger::LOG_MSG, "Time for a request $ms ms. for request : '$sql'" );
             $log->Term();
         }
 
@@ -238,6 +241,19 @@ class Database
         }
 
         return $ret;
+    }
+
+    public function GetTriggers()
+    {
+        $res = array();
+
+        $this->Query( "SHOW TRIGGERS FROM " . $this->GetDatabaseName() );
+        $rows = $this->LoadAllResultArray();
+
+        foreach( $rows as $row )
+            $res[] = $row[0];
+
+        return $res;
     }
 
     public function LoadResultArray()
