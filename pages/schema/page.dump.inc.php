@@ -14,6 +14,8 @@ class page_dump extends PageMVCSecure
         fclose( $phpFile );
         echo "DB state written to 'currentDatabase.inc.php'<br/>";
 
+        $this->QPath->ClearDatabaseSchemaCache();
+
         echo "<br/>DB state :<br/>";
         echo "<pre>" . DumpCode( $dbDesc ) . "</pre>";
     }

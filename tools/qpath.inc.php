@@ -1,5 +1,8 @@
 <?php
 
+define( "QPATH_CACHE", "QPATH_CACHE" );
+define( "DATABASE_SCHEMA_CACHE", "DATABASE_SCHEMA_CACHE" );
+
 function QPathQueryFieldList( $table, $fields )
 {
     $res = array();
@@ -1119,6 +1122,11 @@ class QPath
         return implode( ", ", $fields );
     }
 
+    function ClearDatabaseSchemaCache()
+    {
+        HLibStoredVariables()->Remove( QPATH_CACHE, DATABASE_SCHEMA_CACHE );
+    }
+
     private $dbDesc;
 
     private function _EnsureDbDesc()
@@ -1126,12 +1134,12 @@ class QPath
         if( $this->dbDesc != null )
             return;
 
-        $this->dbDesc = HLibStoredVariables()->Read( "QPATH_CACHE", "DATABASE_SCHEMA_CACHE" );
+        $this->dbDesc = HLibStoredVariables()->Read( QPATH_CACHE, DATABASE_SCHEMA_CACHE );
 
         if( $this->dbDesc == null )
         {
             $this->dbDesc = $this->db->GetDatabaseDescription( false );
-            HLibStoredVariables()->Store( "QPATH_CACHE", "DATABASE_SCHEMA_CACHE", $this->dbDesc );
+            HLibStoredVariables()->Store( QPATH_CACHE, DATABASE_SCHEMA_CACHE, $this->dbDesc );
         }
     }
 
@@ -1157,19 +1165,6 @@ class QPath
             if( !in_array( $fieldName, $IGNORED_FIELDS ) )
                 $this->cacheFields[$tableName][] = $fieldName;
         }
-
-        /*$res = $this->db->Query( "DESCRIBE " . $tableName );
-        if( !$res )
-            return;
-
-        $rows = $this->db->LoadAllResultArray();
-        foreach( $rows as $row )
-        {
-            $this->cacheFieldsExhaustive[$tableName][] = $row[0];
-
-            if( !in_array( $row[0], $IGNORED_FIELDS ) )
-                $this->cacheFields[$tableName][] = $row[0];
-        }*/
     }
 }
 
