@@ -83,6 +83,9 @@ class Installation extends HexaComponentImpl
 
             foreach( $desc["fields"] as $fieldName => $fieldDesc )
                 $this->CheckReferences( $newTable, $fieldName, null, $fieldDesc, $sqlsRefs, $currentDB );
+
+            $curIndices = isset($currentDbDesc[$newTable]) ? (isset($currentDbDesc[$newTable]['indices']) ? $currentDbDesc[$newTable]['indices'] : null) : null;
+            $this->CheckIndices( $newTable, $curIndices, isset($desc["indices"]) ? $desc["indices"] : null, $sqlsRefs );
         }
 
 
@@ -108,13 +111,6 @@ class Installation extends HexaComponentImpl
             if( arrays_eq( $tgt, $cur ) )
                 continue;
 
-            //echo "Table $table are different<br/>";
-            //Dump( $tgt );
-            //Dump( $cur );
-            // new fields
-            // removed fields
-            // modified fields
-
             // check fields
             $tgtFields = $tgt["fields"];
             $curFields = $cur['fields'];
@@ -127,24 +123,16 @@ class Installation extends HexaComponentImpl
                 $removedFields = array_diff( $curNames, $tgtNames );
                 $maybeModifiedFields = array_diff( $tgtNames, $newFields );
 
-                //Dump( $newFields );
                 foreach( $newFields as $newField )
                 {
-                    //echo "New field $newField<br/>";
                     $sqls[] = "ALTER TABLE `$table` ADD " . $this->GetColumnSql( $newField, $tgtFields[$newField], $currentDB );
                 }
 
-                //Dump( $removedFields );
                 foreach( $removedFields as $removedField )
                 {
                     if( $doDelete )
                     {
-                        //echo "Removed field $removedField<br/>";
                         $sqls[] = "ALTER TABLE `$table` DROP `$removedField` ";
-                    }
-                    else
-                    {
-                        //echo "IGNORED - Removed field $removedField<br/>";
                     }
                 }
 
@@ -157,18 +145,13 @@ class Installation extends HexaComponentImpl
                     $curComment = isset($curFields[$field]['comment']) ? $curFields[$field]['comment'] : "";
                     $tgtComment = isset($tgtFields[$field]['comment']) ? $tgtFields[$field]['comment'] : "";
                     if( $tgtComment != $curComment )
-                    {
-                        //echo "Modified comment to '$tgtComment'<br/>";
                         $sqls[] = "ALTER TABLE `$table` CHANGE `$field` " . $this->GetColumnSql( $field, $tgtFields[$field], $currentDB );
-                    }
                 }
-
-                continue;
             }
 
-            //Dump( $cur );
-            //Dump( $tgt );
-            //return;
+            // modified indices
+            $curIndices = isset($cur['indices']) ? $cur['indices'] : null;
+            $this->CheckIndices( $table, $curIndices, isset($tgt["indices"]) ? $tgt["indices"] : null, $sqlsRefs );
         }
 
         return array_merge( $sqls, $sqlsRefs );
@@ -198,6 +181,59 @@ class Installation extends HexaComponentImpl
         //echo $command;
         return $command;
 
+    }
+
+    private function HasSimilarIndex( $indices, $columns )
+    {
+        $nbColumns = count( $columns );
+        foreach( $indices as $cs )
+        {
+            if( count( $cs ) != $nbColumns )
+                continue;
+            $not = false;
+            for( $i = 0; $i < $nbColumns; $i++ )
+                if( $cs[$i] != $columns[$i] )
+                {
+                    $not = true;
+                    break;
+                }
+            if( $not )
+                continue;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private function CheckIndices( $tableName, $curIndices, $tgtIndices, &$sqls )
+    {
+        $curIndices = $curIndices == null ? array() : $curIndices;
+        $tgtIndices = $tgtIndices == null ? array() : $tgtIndices;
+
+        foreach( $curIndices as $indexName => $columns )
+        {
+            if( $this->HasSimilarIndex( $tgtIndices, $columns ) )
+                continue;
+
+            echo "To be deleted index in table $tableName : '$indexName' on columns " . implode( ', ', $columns ) . "<br/>";
+
+            $sqls[] = "DROP INDEX $indexName ON $tableName";
+        }
+
+        foreach( $tgtIndices as $indexName => $columns )
+        {
+            if( $this->HasSimilarIndex( $curIndices, $columns ) )
+                continue;
+
+            echo "To be created index in table $tableName : '$indexName' on columns " . implode( ', ', $columns ) . "<br/>";
+
+            $columns = array_map( function( $e )
+            {
+                return "`$e`";
+            }, $columns );
+            $sqls[] = "CREATE INDEX $indexName ON $tableName (" . implode( ', ', $columns ) . ")";
+        }
     }
 
     private function CheckReferences( $tableName, $fieldName, $curField, $tgtField, &$sqls, Database $currentDB )
