@@ -1,5 +1,8 @@
 <?php
 
+if( !defined( "GWT_LONG_QUERY_LIMIT" ) )
+    define( "GWT_LONG_QUERY_LIMIT", 2000 );
+
 abstract class PageGWTIO extends PageImpl
 {
     abstract function GetPermissionManager();
@@ -43,8 +46,6 @@ abstract class PageGWTIO extends PageImpl
 
         $logger = new Logger();
         $logger->Init( 'gwt-interop-direct.txt', Logger::LOG_MSG );
-
-        //$logger->Log( Logger::LOG_MSG, 'QUERY URL: ' . $_SERVER['QUERY_STRING'] );
 
         $result = array();
 
@@ -127,7 +128,7 @@ abstract class PageGWTIO extends PageImpl
                     if( $logMethod )
                         $logger->Log( Logger::LOG_MSG, "(" . round( $ms, 2 ) . " ms) user:$loggedUserId " . $method . '( ' . array2string( $parameters ) . ' )' );
 
-                    if( $ms > 2000 )
+                    if( $ms > GWT_LONG_QUERY_LIMIT )
                     {
                         $log = new Logger();
                         $log->Init( 'gwtio-long_requests.txt', Logger::LOG_MSG );
