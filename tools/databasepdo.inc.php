@@ -534,6 +534,45 @@ class Database
             }
         }
 
+        foreach( $dbDesc as $tableName => $tableDesc )
+        {
+            $indices = array();
+
+            $this->Query( "SHOW INDEX FROM $tableName" );
+            $rawIndexes = $this->LoadAllResultAssoc();
+            foreach( $rawIndexes as $raw )
+            {
+                $name = $raw['Key_name'];
+                $seq = (int) ($raw['Seq_in_index'] * 1 - 1);
+                $column = $raw['Column_name'];
+
+                if( $name == "PRIMARY" )
+                    continue;
+                if( $hideSynchroFields && 0 == strncmp( $name, "synchro_server", 14 ) )
+                    continue;
+
+                if( !isset($indices[$name]) )
+                    $indices[$name] = array();
+
+                $indices[$name][$seq] = $column;
+            }
+
+            foreach( $indices as $indexName => $columnList )
+            {
+                if( count( $columnList ) != 1 )
+                    continue;
+
+                $fieldName = $columnList[0];
+                if( isset($dbDesc[$tableName]['fields'][$fieldName]['references'])
+                    || (isset($dbDesc[$tableName]['fields'][$fieldName]['primary_key']) && $dbDesc[$tableName]['fields'][$fieldName]['primary_key'] == true)
+                )
+                    unset($indices[$indexName]);
+            }
+
+            if( count( $indices ) > 0 )
+                $dbDesc[$tableName]['indices'] = $indices;
+        }
+
         return $dbDesc;
     }
 }
