@@ -225,6 +225,16 @@ function sign( $n )
     return -1;
 }
 
+function startsWith( $haystack, $needle )
+{
+    return strpos( $haystack, $needle ) === 0;
+}
+
+function endsWith( $haystack, $needle )
+{
+    return $needle === "" || (($temp = strlen( $haystack ) - strlen( $needle )) >= 0 && strpos( $haystack, $needle, $temp ) !== false);
+}
+
 
 function CreateThumbnail( $type, $srcFile, $destFile, $width, $height )
 {
