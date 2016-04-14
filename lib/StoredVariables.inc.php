@@ -67,7 +67,8 @@ class StoredVariables extends HexaComponentImpl
     public function Remove( $domainUID, $variableName )
     {
         $fileName = $this->getVariableFileName( $domainUID, $variableName );
-        unlink( $fileName );
+        if( file_exists( $fileName ) )
+            unlink( $fileName );
 
         // TODO : if the containing directory is empty, destroy it, recursively
     }
