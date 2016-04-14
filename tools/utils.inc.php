@@ -319,4 +319,39 @@ function getStackTrace( $pass = 2 )
     return implode( "\r\n", $out );
 }
 
+function unlinkDir( $dir )
+{
+    $dirs = array( $dir );
+    $files = array();
+
+    for( $i = 0; ; $i++ )
+    {
+        if( !isset($dirs[$i]) )
+            break;
+
+        $dir = $dirs[$i];
+
+        if( $openDir = opendir( $dir ) )
+        {
+            while( false !== ($readDir = readdir( $openDir )) )
+            {
+                if( $readDir == "." || $readDir == ".." )
+                    continue;
+
+                if( is_dir( $dir . "/" . $readDir ) )
+                    $dirs[] = $dir . "/" . $readDir;
+                else
+                    $files[] = $dir . "/" . $readDir;
+            }
+        }
+    }
+
+    foreach( $files as $file )
+        unlink( $file );
+
+    $dirs = array_reverse( $dirs );
+    foreach( $dirs as $dir )
+        rmdir( $dir );
+}
+
 ?>
