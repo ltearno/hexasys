@@ -14,8 +14,6 @@ class Logger
     var $logLevel = 0;
     var $logId = 0;
 
-    var $nbNotFlushed = 0;
-
     public function Init( $fileName, $logLevel )
     {
         $logDir = APP_DATA_DIR . 'logs/' . date( 'Y-m-d', strtotime( 'now' ) );
