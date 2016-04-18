@@ -34,7 +34,7 @@ class BkgndJobs extends HexaComponentImpl
      */
     private function getJobMngInstance( $jobAddress )
     {
-        $classContainer = APP_DIR . "jobmngs/job." . $jobAddress . ".inc.php";
+        $classContainer = APP_DIR . "jobs/job." . $jobAddress . ".inc.php";
         include_once($classContainer);
 
         $classToCall = "job_" . $jobAddress;
