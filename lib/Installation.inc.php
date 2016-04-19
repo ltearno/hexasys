@@ -125,7 +125,7 @@ class Installation extends HexaComponentImpl
 
                 foreach( $newFields as $newField )
                 {
-                    $sqls[] = "ALTER TABLE `$table` ADD " . $this->GetColumnSql( $newField, $tgtFields[$newField], $currentDB );
+                    $sqls[] = $this->GetAddColumnSql( $table, $newField, $tgtFields[$newField], $currentDB );
                 }
 
                 foreach( $removedFields as $removedField )
@@ -272,6 +272,11 @@ class Installation extends HexaComponentImpl
                 $sqls[] = "ALTER TABLE `$tableName` ADD FOREIGN KEY (`$fieldName`) REFERENCES `" . $ref['table'] . "`(`" . $ref['field'] . "`)";
             }
         }
+    }
+
+    public function GetAddColumnSql( $table, $fieldName, $fieldDesc, Database $currentDB )
+    {
+        return "ALTER TABLE `$table` ADD " . $this->GetColumnSql( $fieldName, $fieldDesc, $currentDB );
     }
 
     /* SQL formatting helpers */
