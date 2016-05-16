@@ -377,7 +377,7 @@ class QPath
                 if( $i < count( $values ) - 1 )
                     $s .= ',';
             }
-            $sql = "INSERT INTO " . $table . " (`" . implode( "`,`", array_keys( $fields ) ) . "`) VALUES(" . $s . ")";
+            $sql = "INSERT INTO `" . $table . "` (`" . implode( "`,`", array_keys( $fields ) ) . "`) VALUES(" . $s . ")";
         }
         $this->db->Query( $sql );
 
@@ -403,7 +403,7 @@ class QPath
 
         $this->logger->Log( Logger::LOG_MSG, "user:$loggedUserId DELETE : " . $table . ' CONDITION : ' . $cond );
 
-        $sql = "DELETE FROM " . $table . " WHERE " . $cond;
+        $sql = "DELETE FROM `" . $table . "` WHERE " . $cond;
         $res = $this->db->Query( $sql );
 
         if( $res == null )
@@ -427,7 +427,7 @@ class QPath
             else
                 $a[] = "`" . $name . "`=" . $this->db->Quote( $value );
         }
-        $sql = "UPDATE $table SET " . implode( ", ", $a ) . " WHERE $cond";
+        $sql = "UPDATE `$table` SET " . implode( ", ", $a ) . " WHERE $cond";
 
         $loggedUserId = HLibSecurity()->GetLoggedUserId();
 
