@@ -12,9 +12,17 @@ class page_list extends PageMVCSecure
             echo "Job $jobId has been deleted<br/><br/><br/>";
         }
 
+        if( isset($posts["step_job"]) )
+        {
+            $jobId = $posts["step_job"];
+            HLibBkgndJobs()->Step( $jobId );
+
+            echo "Job $jobId has been stepped<br/><br/><br/>";
+        }
+
         $jobs = $this->QPath->QueryEx( "bkgnd_jobs" );
         echo "Background jobs list:<br/>";
-        echo QDumpTable( $jobs, array( "Description and status" => new FieldJobDescription(), "Delete" => new FieldJobDelete( $this ) ) );
+        echo QDumpTable( $jobs, array( "Description and status" => new FieldJobDescription(), "Step" => new FieldJobActions( $this ) ) );
     }
 }
 
@@ -26,7 +34,7 @@ class FieldJobDescription
     }
 }
 
-class FieldJobDelete
+class FieldJobActions
 {
     var $page;
 
@@ -37,7 +45,7 @@ class FieldJobDelete
 
     function RowValue( QPathResult $qPathResult, $i )
     {
-        return getButton( $this->page, "Delete", array( "delete_job" => $qPathResult->GetVal( $i, "bkgnd_jobs.id" ) ), null );
+        return getButton( $this->page, "Step", array( "step_job" => $qPathResult->GetVal( $i, "bkgnd_jobs.id" ) ), null ) . getButton( $this->page, "Delete", array( "delete_job" => $qPathResult->GetVal( $i, "bkgnd_jobs.id" ) ), null );
     }
 }
 
