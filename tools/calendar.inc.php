@@ -886,7 +886,7 @@ class CalendarPeriod
     // returns true if the submitted date is included in the list of periods, false if not
     function IsInside( $date )
     {
-        if( $this > periods == null )
+        if( $this->periods == null )
         {
             if( $this->days[date_get_day( $date )] > 0 )
                 return true;
