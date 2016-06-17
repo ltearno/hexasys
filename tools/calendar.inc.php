@@ -94,6 +94,11 @@ function date_get_day( $date )
     return (intdiv_ex( 23 * $m, 9 ) + $d + 4 + $y + intdiv_ex( $z, 4 ) - intdiv_ex( $z, 100 ) + intdiv_ex( $z, 400 ) - $r) % 7;
 }
 
+function reformatDate( $date, $format )
+{
+	return date( $format, strtotime( $date ) );
+}
+
 function now()
 {
     return date( 'Y-m-d', strtotime( 'now' ) );
