@@ -597,6 +597,9 @@ class QPath
 
         echo "QPath parse error with expression : <b>$toeval</b><br/>Stack content is :";
         Dump( $stack );
+		
+		echo "Stack trace is:";
+		echo getStackTrace();
 
         return null;
     }
