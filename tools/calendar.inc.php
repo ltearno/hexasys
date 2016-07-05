@@ -94,11 +94,6 @@ function date_get_day( $date )
     return (intdiv_ex( 23 * $m, 9 ) + $d + 4 + $y + intdiv_ex( $z, 4 ) - intdiv_ex( $z, 100 ) + intdiv_ex( $z, 400 ) - $r) % 7;
 }
 
-function reformatDate( $date, $format )
-{
-	return date( $format, strtotime( $date ) );
-}
-
 function now()
 {
     return date( 'Y-m-d', strtotime( 'now' ) );
@@ -915,6 +910,9 @@ class CalendarPeriod
     {
         if( is_null( $this->periods ) )
         {
+			// Théoriquement si $from à $to couvre au moins une semaine entière,
+			// il faut que les 7 jours soient "cochés"
+			// sinon il nous faut les jours couverts...
             echo "IsContained() TO BE IMPLEMENTED FLLKJ :: {{ } ''<br/>";
         }
 
@@ -939,7 +937,13 @@ class CalendarPeriod
     {
         if( is_null( $this->periods ) )
         {
-            echo "IsContained() TO BE IMPLEMENTED FLLKJ :: {{ } ''<br/>";
+			// normalement on devrait retourner l'infini (si il y a au moins
+			// un jour de "coché".
+			// mais de toutes façons, spécifier une période sans borne
+			// n'est pas une bonne idée.
+			// pas la peine de fausser encore plus les calculs (rapports)
+			// donc on retourne 0
+			return 0;
         }
 
         $nbDays = 0;
@@ -960,7 +964,13 @@ class CalendarPeriod
     {
         if( is_null( $this->periods ) )
         {
-            echo "IsContained() TO BE IMPLEMENTED FLLKJ :: {{ } ''<br/>";
+            // normalement on devrait retourner l'infini (si il y a au moins
+			// un jour de "coché".
+			// mais de toutes façons, spécifier une période sans borne
+			// n'est pas une bonne idée.
+			// pas la peine de fausser encore plus les calculs (rapports)
+			// donc on retourne 0
+			return 0;
         }
 
         $nbNights = 0;
