@@ -8,6 +8,7 @@ class RPCProxy
 
     var $lastCalledUrl;
     var $lastAnswer;
+	var $lastError;
 
     public function __construct( $baseUrl, $rpcEndpointPageAddress, $token )
     {
@@ -28,7 +29,7 @@ class RPCProxy
         $url = "{$this->baseUrl}?container={$this->rpcEndpointPageAddress}";
 
         $this->lastCalledUrl = $url;
-        $this->lastAnswer = null;
+        $this->lastAnswer = "=> NOT CALLED YET $method '$url' " . json2string( $params );
 
         $postPayload = array(
             "magic" => "v1",
@@ -51,6 +52,7 @@ class RPCProxy
 
         $rawAnswer = $response;
         $this->lastAnswer = $rawAnswer;
+		$this->lastError = curl_error( $ch );
 
         $res = string2Json( $response );
 
