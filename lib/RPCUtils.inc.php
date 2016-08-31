@@ -8,7 +8,7 @@ class RPCProxy
 
     var $lastCalledUrl;
     var $lastAnswer;
-	var $lastError;
+    var $lastError;
 
     public function __construct( $baseUrl, $rpcEndpointPageAddress, $token )
     {
@@ -42,8 +42,8 @@ class RPCProxy
         // curl_setopt( $ch, CURLOPT_HTTPHEADER, array( "Content-type: text/html; charset=UTF-8" ) );
         curl_setopt( $ch, CURLOPT_POSTFIELDS, $postPayload );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+
         $response = curl_exec( $ch );
-        curl_close( $ch );
 
         // remove BOM if present
         $__BOM = pack( 'CCC', 239, 187, 191 );
@@ -52,7 +52,9 @@ class RPCProxy
 
         $rawAnswer = $response;
         $this->lastAnswer = $rawAnswer;
-		$this->lastError = curl_error( $ch );
+        $this->lastError = curl_error( $ch );
+
+        curl_close( $ch );
 
         $res = string2Json( $response );
 
