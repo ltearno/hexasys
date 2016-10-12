@@ -27,6 +27,8 @@ class Database
     var $errorMsg = '';
 
     var $logger = null;
+    
+    var $dumpLogger = null;
 
     public function Init( $options )
     {
@@ -54,6 +56,9 @@ class Database
 
         $this->logger = new Logger();
         $this->logger->Init( 'database-pdo-' . ($this->database == null ? "notselected" : $this->database) . '.txt', Logger::LOG_MSG );
+        
+        $this->dumpLogger = new Logger();
+        $this->dumpLogger->Init( 'database-pdo-fulldump-' . ($this->database == null ? "notselected" : $this->database) . '.txt', Logger::LOG_MSG );
 
         $this->Connect( $this->database );
     }
@@ -164,6 +169,8 @@ class Database
         }
 
         $this->FreeResult();
+        
+        //$this->dumpLogger->Log( Logger::LOG_MSG, $sql );
 
         // start a time measure
         $m = HLibMeasure()->Start();
