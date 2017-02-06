@@ -102,6 +102,8 @@ abstract class PageMVCSecure extends PageMVC
             return;
         }
 
+        $this->generateHeaderPart();
+
         ?>
         <nav class="navbar navbar-inverse navbar-fixed-top">
             <div class="container">
@@ -113,25 +115,26 @@ abstract class PageMVCSecure extends PageMVC
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Registration System</a>
+                    <a class="navbar-brand" href="?">Registration System</a>
                 </div>
                 <div id="navbar" class="collapse navbar-collapse">
                     <ul class="nav navbar-nav">
                         <li><a>You are on <?php echo SYNCHRO_SITE_NAME ?></a></li>
-                        <li class="active"><a><?php echo $message ?></a>    </li>
+                        <li class="active"><a><?php echo $message ?></a></li>
                         <li><?php echo $this->ctx->getHref("Refresh", $this->ctx->getState()) ?></li>
                         <li><?php echo $this->ctx->getHref("Logout", array("logout" => true)) ?></li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
         </nav>
-        <?php
 
+        <?php
         try {
-            parent::Execute($params, $posts);
+            $this->generateBodyPart($params, $posts);
         } catch (SecurityException $e) {
             echo "You don't have the right permission do take this action, please contact your system adminstrator if you feel that you should be granted access to this functionality <br/>";
         }
+        $this->generateFooterPart();
     }
 }
 

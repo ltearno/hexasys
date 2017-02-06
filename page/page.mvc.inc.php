@@ -41,20 +41,7 @@ abstract class PageMVC extends PageImpl
     {
         $this->generateHeaderPart();
 
-        // call the abstract method
-        $msg = "";
-        $messages = array();
-        $this->Run($params, $posts, $view_data, $msg);
-        if ($msg != "")
-            $messages[] = $msg;
-
-        // add the messages if any
-        if (count($messages) > 0) {
-            echo "<div class='messages'>";
-            foreach ($messages as $message)
-                echo "<div class='message'>" . $message . "</div>";
-            echo "</div>";
-        }
+        $this->generateBodyPart($params, $posts);
 
         // footer display
         $this->generateFooterPart();
@@ -85,14 +72,46 @@ abstract class PageMVC extends PageImpl
             $out = str_replace('###HEXA_DIR###', "", $out);
 
         echo $out;
-        echo "<div class='container'>";
     }
 
     // Outputs the footer of the web page to send to web-clients, called by the framework
     function ViewFooter()
     {
-        echo "</div>";
+        ?>
+        <footer class="footer"
+                style=" position: absolute;bottom: 0;width: 100%; height: 60px;background-color: #f5f5f5;">
+            <div class="container">
+                <p class="text-muted">Registration System is brought with love by <a href="http://lteconsulting.fr">LTE
+                        Consulting</a></p>
+            </div>
+        </footer>
+        <?php
         echo $this->footer;
+    }
+
+    /**
+     * @param $params
+     * @param $posts
+     */
+    public function generateBodyPart($params, $posts)
+    {
+        echo "<div class='container' style='margin-top: 50px;'>";
+
+        $msg = "";
+        $messages = array();
+        $this->Run($params, $posts, $view_data, $msg);
+        if ($msg != "")
+            $messages[] = $msg;
+
+        // add the messages if any
+        if (count($messages) > 0) {
+            echo "<div class='container'><div class='messages'>";
+            foreach ($messages as $message)
+                echo "<div class='message'>" . $message . "</div>";
+            echo "</div></div>";
+        }
+
+        echo "</div>";
     }
 }
 
