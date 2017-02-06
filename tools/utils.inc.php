@@ -1,7 +1,6 @@
 <?php
 
-if( !function_exists( 'bcadd' ) )
-{
+if (!function_exists('bcadd')) {
     include_once 'bcmath.inc.php';
 }
 
@@ -14,9 +13,9 @@ if( !function_exists( 'bcadd' ) )
  * @param string $value
  * @return number
  */
-function convCents( $value )
+function convCents($value)
 {
-    return bcmul( bcmul( $value, "100", 2 ), 1, 0 );
+    return bcmul(bcmul($value, "100", 2), 1, 0);
 }
 
 /**
@@ -27,93 +26,89 @@ function convCents( $value )
  * @param int $value A value, in cents
  * @return String A String representation of the value in decimal format
  */
-function convCentsBack( $value )
+function convCentsBack($value)
 {
-    return bcdiv( $value, "100", 2 );
+    return bcdiv($value, "100", 2);
 }
 
-function ensureDirectoryExists( $directory )
+function ensureDirectoryExists($directory)
 {
-    $parts = explode( "/", $directory );
+    $parts = explode("/", $directory);
     $place = "";
 
-    while( count( $parts ) > 0 )
-    {
-        if( $place . $parts[0] != "" && !file_exists( $place . $parts[0] ) )
-            mkdir( $place . $parts[0] );
-        $place .= array_shift( $parts ) . "/";
+    while (count($parts) > 0) {
+        if ($place . $parts[0] != "" && !file_exists($place . $parts[0]))
+            mkdir($place . $parts[0]);
+        $place .= array_shift($parts) . "/";
     }
 }
 
-function string2Json( $string )
+function string2Json($string)
 {
-    $json = json_decode( $string, true );
+    $json = json_decode($string, true);
 
     return $json;
 }
 
-function json2string( $json )
+function json2string($json)
 {
-    return json_encode( $json );
+    return json_encode($json);
 }
 
-function getArrayField( $json, $path )
+function getArrayField($json, $path)
 {
     $current = $json;
-    $parts = explode( ".", $path );
+    $parts = explode(".", $path);
 
-    while( count( $parts ) > 1 )
-    {
+    while (count($parts) > 1) {
         // maybe info does not exist
-        if( !isset($current[$parts[0]]) )
+        if (!isset($current[$parts[0]]))
             return null;
 
         $current = $current[$parts[0]];
-        array_shift( $parts );
+        array_shift($parts);
     }
 
-    if( isset($current[$parts[0]]) )
+    if (isset($current[$parts[0]]))
         return $current[$parts[0]];
 
     return null;
 }
 
-function setArrayField( &$json, $path, $value )
+function setArrayField(&$json, $path, $value)
 {
-    if( $json == null )
+    if ($json == null)
         $json = array();
 
     $current = &$json;
-    $parts = explode( ".", $path );
+    $parts = explode(".", $path);
 
-    while( count( $parts ) > 1 )
-    {
+    while (count($parts) > 1) {
         // maybe info does not exist
-        if( !(isset($current[$parts[0]]) && is_array( $current[$parts[0]] )) )
+        if (!(isset($current[$parts[0]]) && is_array($current[$parts[0]])))
             $current[$parts[0]] = array();
 
         $current = &$current[$parts[0]];
-        array_shift( $parts );
+        array_shift($parts);
     }
 
     $current[$parts[0]] = $value;
 }
 
-function array2string( $array )
+function array2string($array)
 {
     $s = "";
     $addComa = false;
-    foreach( $array as $k => $e )
-    {
-        if( $addComa )
+    foreach ($array as $k => $e) {
+        if ($addComa)
             $s .= ", ";
         $addComa = true;
 
-        if( !is_numeric( $k ) )
+        if (!is_numeric($k))
             $s .= $k . " => ";
 
-        if( is_array( $e ) )
-            $s .= "{ " . array2string( $e ) . " }";
+        if (is_array($e))
+            $s .= "{ " . array2string($e) . " }";
         else
             $s .= $e;
     }
@@ -128,33 +123,31 @@ function generatePassword()
     $taille = 100;
 
     // r�cup�ration des chiffres et lettre
-    for( $i = 48; $i < 58; $i++ ) $tpass[$id++] = chr( $i );
-    for( $i = 65; $i < 91; $i++ ) $tpass[$id++] = chr( $i );
-    for( $i = 97; $i < 123; $i++ ) $tpass[$id++] = chr( $i );
+    for ($i = 48; $i < 58; $i++) $tpass[$id++] = chr($i);
+    for ($i = 65; $i < 91; $i++) $tpass[$id++] = chr($i);
+    for ($i = 97; $i < 123; $i++) $tpass[$id++] = chr($i);
 
     $passwd = "";
-    for( $i = 0; $i < $taille; $i++ )
-        $passwd .= $tpass[rand( 0, $id - 1 )];
+    for ($i = 0; $i < $taille; $i++)
+        $passwd .= $tpass[rand(0, $id - 1)];
 
     //$passwd.="!_.".substr(time(),0,10);
-    $passwd .= substr( time(), 0, 10 );
+    $passwd .= substr(time(), 0, 10);
 
-    return substr( str_shuffle( $passwd ), 0, 12 );
+    return substr(str_shuffle($passwd), 0, 12);
 }
 
 /**
  * Function to check that an array posseses the needed keys
  *
  * @param array $array Array being checked
- * @param array $keys  Array containing the keys to be possessed by {@link $array}
+ * @param array $keys Array containing the keys to be possessed by {@link $array}
  * @return integer
  */
-function CheckArrayContains( $array, $keys )
+function CheckArrayContains($array, $keys)
 {
-    foreach( $keys as $key )
-    {
-        if( !array_key_exists( $key, $array ) )
-        {
+    foreach ($keys as $key) {
+        if (!array_key_exists($key, $array)) {
             //echo 'ARRAY DOESNOT CONTAIN KEY ' . $key . '<br/>';
             //Dump( $array );
             return false;
@@ -164,145 +157,145 @@ function CheckArrayContains( $array, $keys )
     return true;
 }
 
-function arrays_eq( $a, $b )
+function arrays_eq($a, $b)
 {
-    if( gettype( $a ) != gettype( $b ) )
-    {
+    if (gettype($a) != gettype($b)) {
         //echo "not same type,";
         return false;
     }
 
-    if( is_array( $a ) )
-    {
-        if( count( $a ) != count( $b ) )
-        {
+    if (is_array($a)) {
+        if (count($a) != count($b)) {
             //echo "not same size";
             return false;
         }
 
-        $bKeys = array_flip( array_keys( $b ) );
-        foreach( $a as $ak => $av )
-        {
-            if( !array_key_exists( $ak, $b ) )
+        $bKeys = array_flip(array_keys($b));
+        foreach ($a as $ak => $av) {
+            if (!array_key_exists($ak, $b))
                 return false;
 
-            $eq = arrays_eq( $av, $b[$ak] );
-            if( !$eq )
+            $eq = arrays_eq($av, $b[$ak]);
+            if (!$eq)
                 return false;
 
             unset($bKeys[$ak]);
         }
 
-        if( count( $bKeys ) > 0 )
+        if (count($bKeys) > 0)
             return false;
 
         return true;
     }
 
-    if( $a != $b )
+    if ($a != $b)
         return false;
 
     return true;
 }
 
-function ArrayMatch( $a1, $a2 )
+function ArrayMatch($a1, $a2)
 {
-    foreach( $a1 as $e1 )
-        foreach( $a2 as $e2 )
-            if( $e1 == $e2 )
+    foreach ($a1 as $e1)
+        foreach ($a2 as $e2)
+            if ($e1 == $e2)
                 return true;
 
     return false;
 }
 
-function sign( $n )
+function ArrayContains($array, $element)
 {
-    if( $n == 0 )
+    foreach ($array as $e)
+        if ($e == $element)
+            return true;
+
+    return false;
+}
+
+function sign($n)
+{
+    if ($n == 0)
         return 0;
-    if( $n > 0 )
+    if ($n > 0)
         return 1;
 
     return -1;
 }
 
-function startsWith( $haystack, $needle )
+function startsWith($haystack, $needle)
 {
-    return strpos( $haystack, $needle ) === 0;
+    return strpos($haystack, $needle) === 0;
 }
 
-function endsWith( $haystack, $needle )
+function endsWith($haystack, $needle)
 {
-    return $needle === "" || (($temp = strlen( $haystack ) - strlen( $needle )) >= 0 && strpos( $haystack, $needle, $temp ) !== false);
+    return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
 }
 
 
-function CreateThumbnail( $type, $srcFile, $destFile, $width, $height )
+function CreateThumbnail($type, $srcFile, $destFile, $width, $height)
 {
     // hack for ie
-    if( $type == 'pjpeg' )
+    if ($type == 'pjpeg')
         $type = 'jpeg';
-    if( $type == 'jpg' )
+    if ($type == 'jpg')
         $type = 'jpeg';
 
-    if( ($type != 'jpeg') && ($type != 'png') )
+    if (($type != 'jpeg') && ($type != 'png'))
         return null; // not supported
 
-    if( $type == 'jpeg' )
-        $srcImg = imagecreatefromjpeg( $srcFile );
-    else if( $type == 'png' )
-        $srcImg = imagecreatefrompng( $srcFile );
+    if ($type == 'jpeg')
+        $srcImg = imagecreatefromjpeg($srcFile);
+    else if ($type == 'png')
+        $srcImg = imagecreatefrompng($srcFile);
     else
         return null;
 
-    $srcImgW = imageSX( $srcImg );
-    $srcImgH = imageSY( $srcImg );
+    $srcImgW = imageSX($srcImg);
+    $srcImgH = imageSY($srcImg);
 
-    if( $srcImgW > $srcImgH )
-    {
+    if ($srcImgW > $srcImgH) {
         $dstImgW = $width;
         //$dstImgH = $srcImgH * ( $height / $srcImgW );
         $dstImgH = ($srcImgH * $dstImgW) / $srcImgW;
-    }
-    //if( $srcImgW < $srcImgH )
-    else
-    {
+    } //if( $srcImgW < $srcImgH )
+    else {
         $dstImgH = $height;
         $dstImgW = ($srcImgW * $dstImgH) / $srcImgH;
     }
 
-    $dstImg = ImageCreateTrueColor( $dstImgW, $dstImgH );
-    imagecopyresampled( $dstImg, $srcImg, 0, 0, 0, 0, $dstImgW, $dstImgH, $srcImgW, $srcImgH );
+    $dstImg = ImageCreateTrueColor($dstImgW, $dstImgH);
+    imagecopyresampled($dstImg, $srcImg, 0, 0, 0, 0, $dstImgW, $dstImgH, $srcImgW, $srcImgH);
 
-    if( $type == 'jpeg' )
-        imagejpeg( $dstImg, $destFile );
-    else if( $type == 'png' )
-        imagepng( $dstImg, $destFile );
+    if ($type == 'jpeg')
+        imagejpeg($dstImg, $destFile);
+    else if ($type == 'png')
+        imagepng($dstImg, $destFile);
 
-    imagedestroy( $srcImg );
-    imagedestroy( $dstImg );
+    imagedestroy($srcImg);
+    imagedestroy($dstImg);
 
-    return array( $srcImgW, $srcImgH );
+    return array($srcImgW, $srcImgH);
 }
 
-function getStackTrace( $pass = 2 )
+function getStackTrace($pass = 2)
 {
-    $stack = debug_backtrace( 0 );
+    $stack = debug_backtrace(0);
 
     $out = array();
 
-    foreach( $stack as $call )
-    {
-        if( $pass-- > 0 )
-        {
+    foreach ($stack as $call) {
+        if ($pass-- > 0) {
             continue;
         }
 
-        if( isset($call['file']) )
+        if (isset($call['file']))
             $location = "{$call['file']}:{$call['line']}";
         else
             $location = "eval()";
 
-        if( isset($call['class']) )
+        if (isset($call['class']))
             $spec = "{$call['class']}{$call['type']}{$call['function']}";
         else
             $spec = $call['function'];
@@ -316,29 +309,26 @@ function getStackTrace( $pass = 2 )
         $out[] = "$spec\t$location";
     }
 
-    return implode( "\r\n", $out );
+    return implode("\r\n", $out);
 }
 
-function unlinkDir( $dir )
+function unlinkDir($dir)
 {
-    $dirs = array( $dir );
+    $dirs = array($dir);
     $files = array();
 
-    for( $i = 0; ; $i++ )
-    {
-        if( !isset($dirs[$i]) )
+    for ($i = 0; ; $i++) {
+        if (!isset($dirs[$i]))
             break;
 
         $dir = $dirs[$i];
 
-        if( $openDir = opendir( $dir ) )
-        {
-            while( false !== ($readDir = readdir( $openDir )) )
-            {
-                if( $readDir == "." || $readDir == ".." )
+        if ($openDir = opendir($dir)) {
+            while (false !== ($readDir = readdir($openDir))) {
+                if ($readDir == "." || $readDir == "..")
                     continue;
 
-                if( is_dir( $dir . "/" . $readDir ) )
+                if (is_dir($dir . "/" . $readDir))
                     $dirs[] = $dir . "/" . $readDir;
                 else
                     $files[] = $dir . "/" . $readDir;
@@ -346,12 +336,12 @@ function unlinkDir( $dir )
         }
     }
 
-    foreach( $files as $file )
-        unlink( $file );
+    foreach ($files as $file)
+        unlink($file);
 
-    $dirs = array_reverse( $dirs );
-    foreach( $dirs as $dir )
-        rmdir( $dir );
+    $dirs = array_reverse($dirs);
+    foreach ($dirs as $dir)
+        rmdir($dir);
 }
 
 ?>
