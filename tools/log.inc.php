@@ -1,6 +1,8 @@
 <?php
 
-date_default_timezone_set( "UTC" );
+date_default_timezone_set("UTC");
+
+$CURRENT_LOG_ID = uniqid();
 
 class Logger
 {
@@ -14,39 +16,40 @@ class Logger
     var $logLevel = 0;
     var $logId = 0;
 
-    public function Init( $fileName, $logLevel )
+    public function Init($fileName, $logLevel)
     {
-        $logDir = APP_DATA_DIR . 'logs/' . date( 'Y-m-d', strtotime( 'now' ) );
-        ensureDirectoryExists( $logDir );
+        global $CURRENT_LOG_ID;
 
-        $this->logFile = fopen( $logDir . '/' . $fileName, 'a' );
+        $logDir = APP_DATA_DIR . 'logs/' . date('Y-m-d', strtotime('now'));
+        ensureDirectoryExists($logDir);
+
+        $this->logFile = fopen($logDir . '/' . $fileName, 'a');
         $this->logLevel = $logLevel;
-        $this->logId = uniqid();
+        $this->logId = $CURRENT_LOG_ID;
     }
 
     public function Term()
     {
-        fclose( $this->logFile );
+        fclose($this->logFile);
         $this->logFile = null;
     }
 
-    public function LogRaw( $msg )
+    public function LogRaw($msg)
     {
-        fwrite( $this->logFile, $msg . "\r\n" );
+        fwrite($this->logFile, $msg . "\r\n");
     }
 
-    public function Log( $logLevel, $msg = null )
+    public function Log($logLevel, $msg = null)
     {
-        if( $msg == null )
-        {
+        if ($msg == null) {
             $msg = $logLevel;
             $logLevel = Logger::LOG_MSG;
         }
 
-        if( $logLevel < $this->logLevel )
+        if ($logLevel < $this->logLevel)
             return;
 
-        fwrite( $this->logFile, $logLevel . ' ' . Date( 'Y-m-d h:i:s' ) . ' ' . $this->logId . ' ' . $msg . "\r\n" );
+        fwrite($this->logFile, $logLevel . ' ' . Date('Y-m-d h:i:s') . ' ' . $this->logId . ' ' . $msg . "\r\n");
     }
 }
 
