@@ -1,13 +1,13 @@
 <?php
 
-if( !defined( "LONG_QUERY_LIMIT" ) )
-    define( "LONG_QUERY_LIMIT", 2000 );
+if (!defined("LONG_QUERY_LIMIT"))
+    define("LONG_QUERY_LIMIT", 2000);
 
 // helper
-function DBFieldDescHasReference( $table, $field, $refs )
+function DBFieldDescHasReference($table, $field, $refs)
 {
-    foreach( $refs as $ref )
-        if( $ref['table'] == $table && $ref['field'] == $field )
+    foreach ($refs as $ref)
+        if ($ref['table'] == $table && $ref['field'] == $field)
             return true;
 
     return false;
@@ -28,73 +28,68 @@ class Database
 
     var $logger = null;
 
-    public function Init( $options )
+    public function Init($options)
     {
-        $hostAndPort = array_key_exists( 'host', $options ) ? $options['host'] : $this->host;
-        $parts = explode( ":", $hostAndPort );
-        if( count( $parts ) == 1 )
-        {
+        $hostAndPort = array_key_exists('host', $options) ? $options['host'] : $this->host;
+        $parts = explode(":", $hostAndPort);
+        if (count($parts) == 1) {
             $this->host = $hostAndPort;
             $this->port = null;
-        }
-        else if( count( $parts ) == 2 )
-        {
+        } else if (count($parts) == 2) {
             $this->host = $parts[0];
             $this->port = $parts[1];
-        }
-        else
-        {
+        } else {
             echo "BAD CONFIGURATION FOR PDO, HOST SPEC IS INVALID : $hostAndPort !!!";
             // TODO : should explode at this point, anyway it will crash in few moments...
         }
 
-        $this->user = array_key_exists( 'user', $options ) ? $options['user'] : $this->user;
-        $this->password = array_key_exists( 'password', $options ) ? $options['password'] : $this->password;
-        $this->database = array_key_exists( 'database', $options ) ? $options['database'] : $this->database;
+        $this->user = array_key_exists('user', $options) ? $options['user'] : $this->user;
+        $this->password = array_key_exists('password', $options) ? $options['password'] : $this->password;
+        $this->database = array_key_exists('database', $options) ? $options['database'] : $this->database;
 
         $this->logger = new Logger();
-        $this->logger->Init( 'database-pdo-' . ($this->database == null ? "notselected" : $this->database) . '.txt', Logger::LOG_MSG );
+        $this->logger->Init('database-pdo-' . ($this->database == null ? "notselected" : $this->database) . '.txt', Logger::LOG_MSG);
 
-        $this->Connect( $this->database );
+        $this->Connect($this->database);
     }
 
     // return what should be placed after a = or inside a values update statement in a sql query
-    public function Quote( $string )
+    public function Quote($string)
     {
-        if( is_null( $string ) )
+        if (is_null($string))
             return "NULL"; // needed for QPath but maybe that's what pdo->Quote returns anyway...
 
-        if( is_int( $string ) && $string == 0 )
+        if (is_int($string) && $string == 0)
             return "0";
 
         // because it would transform an empty string into NULL (to be verified...)
-        if( (!is_null( $string )) && ($string == "") )
+        if ((!is_null($string)) && ($string == ""))
             return "''";
 
-        return $this->pdo->quote( $string );
+        return $this->pdo->quote($string);
     }
 
     public function IsError()
     {
         // if there is no pdo configured or the configured pdo is in error, return TRUE !
-        if( $this->pdo == null || $this->pdo->errorCode() != 0 )
+        if ($this->pdo == null || $this->pdo->errorCode() != 0)
             return true;
 
         // if the last statement is in error, return TRUE !
-        if( $this->statement != null && $this->statement->errorCode() != 0 )
+        if ($this->statement != null && $this->statement->errorCode() != 0)
             return true;
 
         // otherwise, everything seems ok...
         return false;
     }
 
-    function Error( $msg )
+    function Error($msg)
     {
-        $this->errorMsg = "ERROR " . $msg . " / " . $this->GetErrorInfoText();
+        $traceId = HLibStackTraceRegistry()->RegisterStackTrace();
 
-        $this->logger->Log( Logger::LOG_ERR, $this->errorMsg );
+        $this->errorMsg = "ERROR TID $traceId $msg  / " . $this->GetErrorInfoText();
 
-        //$this->logger->Log( Logger::LOG_ERR, GetDump( debug_backtrace( FALSE ) ) );
+        $this->logger->Log(Logger::LOG_ERR, $this->errorMsg);
     }
 
     function OK()
@@ -109,44 +104,41 @@ class Database
 
     public function GetErrorText()
     {
-        if( $this->errorMsg == null )
+        if ($this->errorMsg == null)
             return "Database : OK";
-        else if( $this->pdo == null )
+        else if ($this->pdo == null)
             return "Error Database : no connection established";
         else
             return $this->errorMsg;
     }
 
     // TODO : this is used only in the installation process, todo = find another way for that !
-    public function SelectDatabase( $database )
+    public function SelectDatabase($database)
     {
-        return $this->Connect( $database );
+        return $this->Connect($database);
     }
 
-    public function QueryDDL( $sql )
+    public function QueryDDL($sql)
     {
-        if( $this->pdo == null )
-        {
-            $this->Error( "TRYING TO SQL WHEN NO DB IS SELECTED, SQL:$sql" );
+        if ($this->pdo == null) {
+            $this->Error("TRYING TO SQL WHEN NO DB IS SELECTED, SQL:$sql");
 
             return null;
         }
 
-        $this->statement = $this->pdo->prepare( $sql );
-        if( $this->statement == null )
-        {
-            $this->logger->Log( Logger::LOG_ERR, "QUERY_DDL : $sql" );
-            $this->Error( "When doing QueryDdl( $sql )" );
+        $this->statement = $this->pdo->prepare($sql);
+        if ($this->statement == null) {
+            $this->logger->Log(Logger::LOG_ERR, "QUERY_DDL : $sql");
+            $this->Error("When doing QueryDdl( $sql )");
 
             return null;
         }
 
         $res = $this->statement->execute();
         $this->statement = null;
-        if( $res === false )
-        {
-            $this->logger->Log( Logger::LOG_ERR, 'QUERY_DDL : ' . $sql );
-            $this->Error( "When doing QueryDdl( $sql )" );
+        if ($res === false) {
+            $this->logger->Log(Logger::LOG_ERR, 'QUERY_DDL : ' . $sql);
+            $this->Error("When doing QueryDdl( $sql )");
 
             return null;
         }
@@ -154,11 +146,10 @@ class Database
         return true;
     }
 
-    public function Query( $sql )
+    public function Query($sql)
     {
-        if( $this->pdo == null )
-        {
-            $this->Error( "TRYING TO SQL WHEN NO DB IS SELECTED, SQL:$sql" );
+        if ($this->pdo == null) {
+            $this->Error("TRYING TO SQL WHEN NO DB IS SELECTED, SQL:$sql");
 
             return null;
         }
@@ -168,30 +159,27 @@ class Database
         // start a time measure
         $m = HLibMeasure()->Start();
 
-        $this->statement = $this->pdo->prepare( $sql );
-        if( $this->statement == null )
-        {
-            $this->logger->Log( Logger::LOG_ERR, 'QUERY : ' . $sql );
-            $this->Error( "When doing Query( $sql )" );
+        $this->statement = $this->pdo->prepare($sql);
+        if ($this->statement == null) {
+            $this->logger->Log(Logger::LOG_ERR, 'QUERY : ' . $sql);
+            $this->Error("When doing Query( $sql )");
 
             return null;
         }
 
         $res = $this->statement->execute();
 
-        $ms = HLibMeasure()->End( $m );
-        if( $ms > LONG_QUERY_LIMIT )
-        {
+        $ms = HLibMeasure()->End($m);
+        if ($ms > LONG_QUERY_LIMIT) {
             $log = new Logger();
-            $log->Init( 'database-pdo-long_requests-' . $this->database . '.txt', Logger::LOG_MSG );
-            $log->Log( Logger::LOG_MSG, "Time for a request $ms ms. for request : '$sql'" );
+            $log->Init('database-pdo-long_requests-' . $this->database . '.txt', Logger::LOG_MSG);
+            $log->Log(Logger::LOG_MSG, "Time for a request $ms ms. for request : '$sql'");
             $log->Term();
         }
 
-        if( !$res )
-        {
-            $this->logger->Log( Logger::LOG_ERR, 'QUERY : ' . $sql );
-            $this->Error( "When doing Query( $sql )" );
+        if (!$res) {
+            $this->logger->Log(Logger::LOG_ERR, 'QUERY : ' . $sql);
+            $this->Error("When doing Query( $sql )");
 
             $this->FreeResult();
 
@@ -203,7 +191,7 @@ class Database
 
     public function InsertedId()
     {
-        if( $this->pdo == null )
+        if ($this->pdo == null)
             return -1;
 
         return $this->pdo->lastInsertId();
@@ -211,7 +199,7 @@ class Database
 
     public function GetNumRows()
     {
-        if( $this->statement == null )
+        if ($this->statement == null)
             return 0;
 
         return $this->statement->rowCount();
@@ -221,9 +209,8 @@ class Database
     {
         $ret = array();
         $numFields = $this->statement->columnCount();
-        for( $i = 0; $i < $numFields; $i++ )
-        {
-            $meta = $this->statement->getColumnMeta( $i );
+        for ($i = 0; $i < $numFields; $i++) {
+            $meta = $this->statement->getColumnMeta($i);
             $ret[] = $meta["name"];
         }
 
@@ -234,9 +221,8 @@ class Database
     {
         $ret = array();
         $numFields = $this->statement->columnCount();
-        for( $i = 0; $i < $numFields; $i++ )
-        {
-            $meta = $this->statement->getColumnMeta( $i );
+        for ($i = 0; $i < $numFields; $i++) {
+            $meta = $this->statement->getColumnMeta($i);
             $ret[$meta["name"]] = $i;
         }
 
@@ -247,10 +233,10 @@ class Database
     {
         $res = array();
 
-        $this->Query( "SHOW TRIGGERS FROM " . $this->GetDatabaseName() );
+        $this->Query("SHOW TRIGGERS FROM " . $this->GetDatabaseName());
         $rows = $this->LoadAllResultArray();
 
-        foreach( $rows as $row )
+        foreach ($rows as $row)
             $res[] = $row[0];
 
         return $res;
@@ -258,28 +244,27 @@ class Database
 
     public function LoadResultArray()
     {
-        return $this->statement->fetch( PDO::FETCH_NUM );
+        return $this->statement->fetch(PDO::FETCH_NUM);
     }
 
-    public function LoadAllResultArray( $numinarray = 0 )
+    public function LoadAllResultArray($numinarray = 0)
     {
-        return $this->statement->fetchAll( PDO::FETCH_NUM );
+        return $this->statement->fetchAll(PDO::FETCH_NUM);
     }
 
     public function LoadResultAssoc()
     {
-        return $this->statement->fetch( PDO::FETCH_ASSOC );
+        return $this->statement->fetch(PDO::FETCH_ASSOC);
     }
 
     public function LoadAllResultAssoc()
     {
-        return $this->statement->fetchAll( PDO::FETCH_ASSOC );
+        return $this->statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function FreeResult()
     {
-        if( $this->statement != null )
-        {
+        if ($this->statement != null) {
             $this->statement->closeCursor();
             $this->statement = null;
         }
@@ -295,20 +280,17 @@ class Database
     {
         $this->FreeResult();
 
-        if( count( $this->transactionStack ) == 0 )
-        {
+        if (count($this->transactionStack) == 0) {
             // main tx level, start a transaction
             $transactionId = "main";
-            $this->pdo->exec( "START TRANSACTION" );
-        }
-        else
-        {
+            $this->pdo->exec("START TRANSACTION");
+        } else {
             // nested transaction : use SAVEPOINTs, this requires InnoDB engine
-            $transactionId = "tx_" . count( $this->transactionStack );
-            $this->pdo->exec( "SAVEPOINT $transactionId" );
+            $transactionId = "tx_" . count($this->transactionStack);
+            $this->pdo->exec("SAVEPOINT $transactionId");
         }
 
-        $this->transactionStack[] = array( "tx_id" => $transactionId, "status" => true );
+        $this->transactionStack[] = array("tx_id" => $transactionId, "status" => true);
 
         return $transactionId;
     }
@@ -317,42 +299,39 @@ class Database
     {
         $this->FreeResult();
 
-        if( count( $this->transactionStack ) == 0 )
-            throw new Exception( "Called AbortTransaction while no transaction was started !" );
+        if (count($this->transactionStack) == 0)
+            throw new Exception("Called AbortTransaction while no transaction was started !");
 
         // save the current transaction's status
-        $this->transactionStack[count( $this->transactionStack ) - 1]["status"] = false;
+        $this->transactionStack[count($this->transactionStack) - 1]["status"] = false;
 
         return true;
     }
 
-    public function CloseTransaction( $transactionId )
+    public function CloseTransaction($transactionId)
     {
         $this->FreeResult();
 
-        if( count( $this->transactionStack ) == 0 )
-            throw new Exception( "Called CloseTransaction while a transaction was not started !" );
+        if (count($this->transactionStack) == 0)
+            throw new Exception("Called CloseTransaction while a transaction was not started !");
 
-        $currentTransactionInfo = array_pop( $this->transactionStack );
+        $currentTransactionInfo = array_pop($this->transactionStack);
         $currentTransactionId = $currentTransactionInfo["tx_id"];
         $currentTransactionStatus = $currentTransactionInfo["status"];
 
-        if( $currentTransactionId != $transactionId )
-            throw new Exception( "Called CloseTransaction on tx_id '$transactionId' but the current tx_id is '$currentTransactionId'" );
+        if ($currentTransactionId != $transactionId)
+            throw new Exception("Called CloseTransaction on tx_id '$transactionId' but the current tx_id is '$currentTransactionId'");
 
-        if( $currentTransactionId == "main" )
-        {
-            if( $currentTransactionStatus )
-                $this->pdo->exec( "COMMIT" );
+        if ($currentTransactionId == "main") {
+            if ($currentTransactionStatus)
+                $this->pdo->exec("COMMIT");
             else
-                $this->pdo->exec( "ROLLBACK" );
-        }
-        else
-        {
-            if( $currentTransactionStatus )
-                $this->pdo->exec( "RELEASE SAVEPOINT $currentTransactionId" );
+                $this->pdo->exec("ROLLBACK");
+        } else {
+            if ($currentTransactionStatus)
+                $this->pdo->exec("RELEASE SAVEPOINT $currentTransactionId");
             else
-                $this->pdo->exec( "ROLLBACK TO SAVEPOINT $currentTransactionId" );
+                $this->pdo->exec("ROLLBACK TO SAVEPOINT $currentTransactionId");
         }
     }
 
@@ -360,34 +339,32 @@ class Database
     // Internals
     //
 
-    private function Connect( $database )
+    private function Connect($database)
     {
         $this->database = $database;
 
         $dsn = "mysql:dbname=$database;host=" . $this->host;
 
-        if( !empty($this->port) )
+        if (!empty($this->port))
             $dsn .= ";port=" . $this->port;
 
-        if( $this->pdo != null )
-            $this->logger->Log( Logger::LOG_MSG, "Reconnecting to DSN:$dsn USER:" . $this->user );
+        if ($this->pdo != null)
+            $this->logger->Log(Logger::LOG_MSG, "Reconnecting to DSN:$dsn USER:" . $this->user);
 
-        try
-        {
-            $this->pdo = new PDO( $dsn, $this->user, $this->password, array( PDO::MYSQL_ATTR_LOCAL_INFILE => true, PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES UTF8" ) );//, array("PDO::MYSQL_ATTR_INIT_COMMAND"=>"SET NAMES UTF8") );
+        try {
+            $this->pdo = new PDO($dsn, $this->user, $this->password, array(PDO::MYSQL_ATTR_LOCAL_INFILE => true, PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES UTF8"));//, array("PDO::MYSQL_ATTR_INIT_COMMAND"=>"SET NAMES UTF8") );
 
-            $this->pdo->exec( 'SET NAMES utf8;' );
-            $this->pdo->exec( "SET @@session.sql_mode= 'NO_ENGINE_SUBSTITUTION';" );
-            $this->pdo->exec( "SET time_zone = '+0:00';" );
+            $this->pdo->exec('SET NAMES utf8;');
+            $this->pdo->exec("SET @@session.sql_mode= 'NO_ENGINE_SUBSTITUTION';");
+            $this->pdo->exec("SET time_zone = '+0:00';");
 
             //$this->pdo->exec( "SET autocommit=0" );
 
             return true;
-        } catch( PDOException $e )
-        {
+        } catch (PDOException $e) {
             $this->pdo = null;
-            $this->Error( 'Cannot connect to mysql server' );
-            $this->logger->Log( Logger::LOG_ERR, "Cannot connect to mysql server. DSN:$dsn USER:" . $this->user . " PASSWORD:xxxxxx MESSAGE:" . $e->getMessage() );
+            $this->Error('Cannot connect to mysql server');
+            $this->logger->Log(Logger::LOG_ERR, "Cannot connect to mysql server. DSN:$dsn USER:" . $this->user . " PASSWORD:xxxxxx MESSAGE:" . $e->getMessage());
 
             return false;
         }
@@ -395,22 +372,17 @@ class Database
 
     private function GetErrorInfoText()
     {
-        if( $this->statement != null )
-        {
+        if ($this->statement != null) {
             $msg = "TYPE:STMT";
             $errorInfo = $this->statement->errorInfo();
-        }
-        else if( $this->pdo != null )
-        {
+        } else if ($this->pdo != null) {
             $msg = "TYPE:PDO";
             $errorInfo = $this->pdo->errorInfo();
-        }
-        else
-        {
+        } else {
             return "NOT_INITIALIZED:No error information";
         }
 
-        if( $errorInfo == null )
+        if ($errorInfo == null)
             return "No error information";
 
         return "$msg CODE:" . $errorInfo[0] . " DRVCODE:" . $errorInfo[1] . " MSG:" . $errorInfo[2];
@@ -426,9 +398,8 @@ class Database
     {
         // use cached data if possible...
         $dbFile = "currentDatabase.inc.php";
-        if( file_exists( $dbFile ) )
-        {
-            $dbDesc = eval(file_get_contents( $dbFile ) . ' return $dbDesc;');
+        if (file_exists($dbFile)) {
+            $dbDesc = eval(file_get_contents($dbFile) . ' return $dbDesc;');
 
             return $dbDesc;
         }
@@ -442,58 +413,53 @@ class Database
     }
 
     // returns an array containing the description of the database schema
-    public function GetDatabaseDescription( $hideSynchroFields = true, $dbName = null )
+    public function GetDatabaseDescription($hideSynchroFields = true, $dbName = null)
     {
-        if( $dbName == null )
+        if ($dbName == null)
             $dbName = $this->database;
 
         $dbDesc = array();
 
-        $this->Query( "SHOW TABLES FROM " . $dbName );
+        $this->Query("SHOW TABLES FROM " . $dbName);
         $rows = $this->LoadAllResultArray();
-        foreach( $rows as $row )
-        {
+        foreach ($rows as $row) {
             $table = $row[0];
 
-            if( 0 == strncmp( $table, "z_sscs_", 7 ) )
+            if (0 == strncmp($table, "y_sscs_", 7))
                 continue;
-            if( 0 == strncmp( $table, "y_sscs_", 7 ) )
-                continue;
-            if( 0 == strncmp( $table, "synchro_server_client_states_", 29 ) )
+            if (0 == strncmp($table, "synchro_server_client_states_", 29))
                 continue;
 
             $tableDesc = array();
             $tableDesc['fields'] = array();
 
-            $this->Query( "DESCRIBE " . $table );
+            $this->Query("DESCRIBE " . $table);
             $fields = $this->LoadAllResultAssoc();
-            foreach( $fields as $field )
-            {
+            foreach ($fields as $field) {
                 $fieldName = $field['Field'];
 
-                if( $hideSynchroFields && 0 == strncmp( $fieldName, "synchro_server", 14 ) )
+                if ($hideSynchroFields && 0 == strncmp($fieldName, "synchro_server", 14))
                     continue;
 
-                $tableDesc['fields'][$fieldName] = array( "type" => $field['Type'], "null" => $field['Null'], "default" => $field['Default'], "extra" => $field['Extra'] );
+                $tableDesc['fields'][$fieldName] = array("type" => $field['Type'], "null" => $field['Null'], "default" => $field['Default'], "extra" => $field['Extra']);
 
-                if( $field['Key'] == "PRI" )
+                if ($field['Key'] == "PRI")
                     $tableDesc['fields'][$fieldName]["primary_key"] = true;
-                else if( $field['Key'] == "UNI" )
+                else if ($field['Key'] == "UNI")
                     $tableDesc['fields'][$fieldName]["unique_key"] = true;
-                else if( $field['Key'] == "MUL" )
+                else if ($field['Key'] == "MUL")
                     $tableDesc['fields'][$fieldName]["multiple_index"] = true;
 
-                $this->Query( "SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='$dbName' AND TABLE_NAME='$table' AND COLUMN_NAME='$fieldName'" );
+                $this->Query("SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='$dbName' AND TABLE_NAME='$table' AND COLUMN_NAME='$fieldName'");
                 $info = $this->LoadAllResultAssoc();
-                if( count( $info ) != 1 )
-                {
+                if (count($info) != 1) {
                     echo "BIG PROBLEM, column has no or multiple definitions !!!";
 
                     return;
                 }
                 $info = $info[0];
 
-                if( $info['COLUMN_COMMENT'] != null )
+                if ($info['COLUMN_COMMENT'] != null)
                     $tableDesc['fields'][$fieldName]['comment'] = $info['COLUMN_COMMENT'];
             }
 
@@ -501,75 +467,68 @@ class Database
         }
 
         // Show constraints
-        $this->Query( "SELECT * FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA='" . $dbName . "'" );
+        $this->Query("SELECT * FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA='" . $dbName . "'");
         $constraints = $this->LoadAllResultAssoc();
 
-        foreach( $constraints as $constraint )
-        {
+        foreach ($constraints as $constraint) {
             $table = $constraint['TABLE_NAME'];
 
-            if( !isset($dbDesc[$table]) )
+            if (!isset($dbDesc[$table]))
                 continue;
 
             $fieldName = $constraint['COLUMN_NAME'];
-            if( $constraint['CONSTRAINT_NAME'] == "PRIMARY" )
-            {
+            if ($constraint['CONSTRAINT_NAME'] == "PRIMARY") {
                 $dbDesc[$table]['fields'][$fieldName]["primary_key"] = true;
-            }
-            else
-            {
+            } else {
                 $refTable = $constraint['REFERENCED_TABLE_NAME'];
                 $refField = $constraint['REFERENCED_COLUMN_NAME'];
 
-                if( $refTable == null || $refField == null )
+                if ($refTable == null || $refField == null)
                     continue; // what is that ??
 
-                if( !isset($dbDesc[$table]['fields'][$fieldName]["references"]) )
+                if (!isset($dbDesc[$table]['fields'][$fieldName]["references"]))
                     $dbDesc[$table]['fields'][$fieldName]["references"] = array();
 
-                if( DBFieldDescHasReference( $refTable, $refField, $dbDesc[$table]['fields'][$fieldName]["references"] ) )
+                if (DBFieldDescHasReference($refTable, $refField, $dbDesc[$table]['fields'][$fieldName]["references"]))
                     continue; // ignore duplicated references
 
-                $dbDesc[$table]['fields'][$fieldName]["references"][] = array( "table" => $refTable, "field" => $refField );
+                $dbDesc[$table]['fields'][$fieldName]["references"][] = array("table" => $refTable, "field" => $refField);
             }
         }
 
-        foreach( $dbDesc as $tableName => $tableDesc )
-        {
+        foreach ($dbDesc as $tableName => $tableDesc) {
             $indices = array();
 
-            $this->Query( "SHOW INDEX FROM $tableName" );
+            $this->Query("SHOW INDEX FROM $tableName");
             $rawIndexes = $this->LoadAllResultAssoc();
-            foreach( $rawIndexes as $raw )
-            {
+            foreach ($rawIndexes as $raw) {
                 $name = $raw['Key_name'];
-                $seq = (int) ($raw['Seq_in_index'] * 1 - 1);
+                $seq = (int)($raw['Seq_in_index'] * 1 - 1);
                 $column = $raw['Column_name'];
 
-                if( $name == "PRIMARY" )
+                if ($name == "PRIMARY")
                     continue;
-                if( $hideSynchroFields && 0 == strncmp( $name, "synchro_server", 14 ) )
+                if ($hideSynchroFields && 0 == strncmp($name, "synchro_server", 14))
                     continue;
 
-                if( !isset($indices[$name]) )
+                if (!isset($indices[$name]))
                     $indices[$name] = array();
 
                 $indices[$name][$seq] = $column;
             }
 
-            foreach( $indices as $indexName => $columnList )
-            {
-                if( count( $columnList ) != 1 )
+            foreach ($indices as $indexName => $columnList) {
+                if (count($columnList) != 1)
                     continue;
 
                 $fieldName = $columnList[0];
-                if( isset($dbDesc[$tableName]['fields'][$fieldName]['references'])
+                if (isset($dbDesc[$tableName]['fields'][$fieldName]['references'])
                     || (isset($dbDesc[$tableName]['fields'][$fieldName]['primary_key']) && $dbDesc[$tableName]['fields'][$fieldName]['primary_key'] == true)
                 )
                     unset($indices[$indexName]);
             }
 
-            if( count( $indices ) > 0 )
+            if (count($indices) > 0)
                 $dbDesc[$tableName]['indices'] = $indices;
         }
 

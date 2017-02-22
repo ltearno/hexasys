@@ -286,26 +286,19 @@ function getStackTrace($pass = 2)
     $out = array();
 
     foreach ($stack as $call) {
-        if ($pass-- > 0) {
+        if ($pass-- > 0)
             continue;
-        }
 
         if (isset($call['file']))
             $location = "{$call['file']}:{$call['line']}";
         else
-            $location = "eval()";
+            $location = "in eval(...)";
 
         if (isset($call['class']))
             $spec = "{$call['class']}{$call['type']}{$call['function']}";
         else
             $spec = $call['function'];
 
-// 		$args = array();
-// 		foreach( $call['args'] as $arg )
-// 			$args[] = DumpCodeCompact( $arg );
-// 		$args = implode( ",", $args );
-
-        //$out[] = "$spec($args)\t$location";
         $out[] = "$spec\t$location";
     }
 
